@@ -18,9 +18,14 @@ pub struct AsteroidCreateInfo {
 }
 
 impl EntityBuilder for AsteroidCreateInfoBuilder {
-    fn build(&self, commands: &mut bevy::ecs::system::EntityCommands) {
+    fn build(&self, commands: &mut bevy::ecs::system::EntityCommands) -> Entity {
         let create_info = self.build().unwrap();
         let asteroid_structure = generate_asteroid_vectors();
+        let asteroid_level = AsteroidSizeLevel::new(create_info.size_level);
+        let scale = asteroid_level.typical_radius();
+
+        let asteroid_structure: Vec<_> =
+            asteroid_structure.into_iter().map(|v| v * scale).collect();
 
         let physic_object = TriangleFanBuilder::default()
             .params(PhysicObjectParams {
@@ -39,15 +44,12 @@ impl EntityBuilder for AsteroidCreateInfoBuilder {
             linvel: Vec2::ZERO,
         });
 
-        let asteroid_level = AsteroidSizeLevel::new(create_info.size_level);
-        let scale = asteroid_level.typical_radius();
-
-        let transform = Transform::from_scale(Vec3::splat(scale))
-            .with_translation(create_info.position.extend(0.0));
+        let transform = Transform::from_translation(create_info.position.extend(0.0));
 
         commands
             .insert(Asteroid)
             .insert(asteroid_level)
-            .insert(TransformBundle::from_transform(transform));
+            .insert(TransformBundle::from_transform(transform))
+            .id()
     }
 }

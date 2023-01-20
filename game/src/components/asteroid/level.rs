@@ -14,6 +14,6 @@ impl AsteroidSizeLevel {
     }
 
     pub fn typical_radius(&self) -> f32 {
-        (2.0 as f32).powi(self.level())
+        (2.0 as f32).powi(self.level() + 3)
     }
 }
