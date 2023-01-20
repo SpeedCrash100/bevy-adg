@@ -11,4 +11,7 @@ name = "game"
 bevy = "0.9"
 bevy_prototype_lyon = "0.7"
 bevy_rapier2d = "0.20"
+derive_builder = "0.12.0"
 physic-objects = { path = "../physic-objects"}
+rand = "0.8.5"
+statrs = "0.16.0"
