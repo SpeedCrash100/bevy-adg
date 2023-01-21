@@ -13,5 +13,6 @@ bevy_prototype_lyon = "0.7"
 bevy_rapier2d = "0.20"
 derive_builder = "0.12.0"
 physic-objects = { path = "../physic-objects"}
+pid = "4.0.0"
 rand = "0.8.5"
 statrs = "0.16.0"
