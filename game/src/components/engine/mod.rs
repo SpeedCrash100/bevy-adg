@@ -6,6 +6,15 @@ mod rotation;
 pub use rotation::RotationEngine;
 pub use rotation::RotationEngineCreateInfoBuilder as RotationEngineBuilder;
 
+/// Engines that can move forward/backwards but not rotate
+mod linear;
+pub use linear::LinearEngine;
+pub use linear::LinearEngineBuilder;
+pub use linear::MainEngine;
+pub use linear::MainEngineBuilder;
+pub use linear::SwayEngine;
+pub use linear::SwayEngineBuilder;
+
 #[derive(Component)]
 pub struct Engine {
     max_force: ExternalForce,

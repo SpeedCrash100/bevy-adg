@@ -15,9 +15,9 @@ const MIN_SPAWN_RANGE: f32 = 200.0;
 /// Maximum range from screen border to spawn asteroid
 const MAX_SPAWN_RANGE: f32 = 1200.0;
 /// Deviation
-const VELOCITY_DEVIATION: f64 = 10.0;
+const VELOCITY_DEVIATION: f64 = 5.0;
 /// Deviation
-const ANGULAR_VELOCITY_DEVIATION: f64 = 3.0;
+const ANGULAR_VELOCITY_DEVIATION: f64 = 1.0;
 
 /// Target Asteroid count in world
 #[derive(Resource)]

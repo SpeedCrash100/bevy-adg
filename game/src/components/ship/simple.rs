@@ -3,7 +3,7 @@ use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::{ColliderMassProperties, RigidBody};
 use physic_objects::prelude::*;
 
-use crate::components::engine::RotationEngineBuilder;
+use crate::components::engine::{MainEngineBuilder, RotationEngineBuilder, SwayEngineBuilder};
 use crate::entity::{EntityBuildDirector, EntityBuilder};
 use crate::math::RotateAroundZ;
 
@@ -51,7 +51,13 @@ impl EntityBuilder for ShipCreateInfoBuilder {
                 create_info.position.extend(0.0),
             )))
             .with_children(|cb| {
-                cb.build_entity(RotationEngineBuilder::default().torque(5_000_000.0_f32));
+                cb.build_entity(RotationEngineBuilder::default().torque(50_000_000.0_f32));
+            })
+            .with_children(|cb| {
+                cb.build_entity(MainEngineBuilder::default().force(1_000_000.0));
+            })
+            .with_children(|cb| {
+                cb.build_entity(SwayEngineBuilder::default().force(1_000_000.0));
             });
 
         EntityBuilder::build(&RotationControlBuilder::default(), commands)
