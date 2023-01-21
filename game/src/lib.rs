@@ -6,6 +6,7 @@ extern crate derive_builder;
 
 mod components;
 mod entity;
+mod math;
 mod plugins;
 mod random;
 
@@ -15,6 +16,7 @@ pub fn run() {
         .add_plugin(PhysicObjectPlugin)
         .add_plugin(plugins::physics::PhysicsPlugin)
         .add_plugin(plugins::asteroid::AsteroidsPlugin)
+        .add_plugin(plugins::player::PlayerPlugin)
         .add_startup_system(create_camera)
         .run();
 }

@@ -1,3 +1,4 @@
+use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
 use bevy_prototype_lyon::prelude::{DrawMode, FillMode, StrokeMode};
 use bevy_rapier2d::prelude::*;
@@ -9,7 +10,6 @@ use super::Asteroid;
 use crate::entity::EntityBuilder;
 
 #[derive(Builder)]
-#[allow(dead_code)]
 pub struct AsteroidCreateInfo {
     #[builder(default = "Vec2::ZERO")]
     position: Vec2,
@@ -18,7 +18,10 @@ pub struct AsteroidCreateInfo {
 }
 
 impl EntityBuilder for AsteroidCreateInfoBuilder {
-    fn build(&self, commands: &mut bevy::ecs::system::EntityCommands) -> Entity {
+    fn build<'w, 's, 'a, 'c>(
+        &self,
+        commands: &'c mut EntityCommands<'w, 's, 'a>,
+    ) -> &'c mut EntityCommands<'w, 's, 'a> {
         let create_info = self.build().unwrap();
         let asteroid_structure = generate_asteroid_vectors();
         let asteroid_level = AsteroidSizeLevel::new(create_info.size_level);
@@ -50,6 +53,5 @@ impl EntityBuilder for AsteroidCreateInfoBuilder {
             .insert(Asteroid)
             .insert(asteroid_level)
             .insert(TransformBundle::from_transform(transform))
-            .id()
     }
 }
