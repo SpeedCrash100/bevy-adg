@@ -10,7 +10,10 @@ use crate::math::RotateAroundZ;
 use super::control::rotation::RotationControlBuilder;
 use super::Ship;
 
-const SHIP_HEIGHT: f32 = 40.0;
+/// Radius vector used to create points for ship
+const SHIP_RADIUS: f32 = 30.0;
+/// Radius vector will be rotated by this angles to create points
+const SHIP_ANGLES: [f32; 3] = [0.0, 135.0, -135.0];
 
 #[derive(Builder)]
 pub struct ShipCreateInfo {
@@ -25,12 +28,10 @@ impl EntityBuilder for ShipCreateInfoBuilder {
     ) -> &'c mut EntityCommands<'w, 's, 'a> {
         let create_info = self.build().unwrap();
 
-        // This is a triangle ship. We will create a radius vector and will rotate it by 120 degrets to get points of the triangle
-        let radius = SHIP_HEIGHT / (1.0 + 60.0_f32.to_radians().cos());
         let mut points = [Vec2::ZERO; 3];
-        for i in 0..3 {
-            let angle = 120.0 * i as f32;
-            let vector = Vec2::X * radius;
+        for i in 0..SHIP_ANGLES.len() {
+            let angle = SHIP_ANGLES[i];
+            let vector = Vec2::X * SHIP_RADIUS;
             points[i] = vector.rotate_z(angle.to_radians());
         }
 

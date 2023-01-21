@@ -1,7 +1,6 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
-use bevy_rapier2d::prelude::*;
 
-use crate::{components::common::Active, entity::EntityBuilder, math::RotateAroundZ};
+use crate::{entity::EntityBuilder, math::RotateAroundZ};
 
 /// The ship's target point to head to
 #[derive(Component, Clone)]
