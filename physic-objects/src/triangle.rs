@@ -34,10 +34,13 @@ impl PhysicObjectBuilder for Builder {
     }
 
     fn build_object(&self) -> Self::OutputType {
+        let area = Area::triangle(&self.points);
         let collider = Collider::triangle(self.points[0], self.points[1], self.points[2]);
+
         PhysicObjectBundle {
             params: self.params.clone(),
             collider,
+            area,
             force: ExternalForce::default(),
             velocity: Velocity::default(),
             read_mass_properties: ReadMassProperties::default(),

@@ -35,10 +35,12 @@ impl PhysicObjectBuilder for Builder {
 
     fn build_object(&self) -> Self::OutputType {
         let collider = Collider::ball(self.radius);
+        let area = Area::circle(self.radius);
 
         PhysicObjectBundle {
             params: self.params.clone(),
             collider,
+            area,
             force: ExternalForce::default(),
             velocity: Velocity::default(),
             read_mass_properties: ReadMassProperties::default(),

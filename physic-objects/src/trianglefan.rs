@@ -40,7 +40,11 @@ impl PhysicObjectBuilder for Builder {
         let pair_points = iter_without_last.zip(iter_without_first);
 
         let mut compound = Vec::with_capacity(pair_points.len());
+        let mut area = Area::new(0.0);
         for (first, second) in pair_points {
+            let points = [Vec2::ZERO, *first, *second];
+            area += Area::triangle(&points);
+
             let shape = Collider::triangle(Vec2::ZERO, *first, *second);
             compound.push((Vec2::ZERO, 0.0, shape));
         }
@@ -58,6 +62,7 @@ impl PhysicObjectBuilder for Builder {
         PhysicObjectBundle {
             params: self.params.clone(),
             collider,
+            area,
             force: ExternalForce::default(),
             velocity: Velocity::default(),
             read_mass_properties: ReadMassProperties::default(),

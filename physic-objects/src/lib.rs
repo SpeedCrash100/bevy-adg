@@ -14,7 +14,12 @@ pub mod trianglefan;
 /// Plugin to enable drawing
 mod plugin;
 
+/// Area component
+mod area;
+pub use area::Area;
+
 pub mod prelude {
+    pub use super::Area;
     pub use super::DrawableObjectBuilder;
     pub use super::ObjectBuilder;
     pub use super::PhysicObjectBuilder;
@@ -33,6 +38,7 @@ pub mod prelude {
 pub struct PhysicObjectBundle {
     params: PhysicObjectParams,
     collider: Collider,
+    area: Area,
 
     force: ExternalForce,
     velocity: Velocity,
