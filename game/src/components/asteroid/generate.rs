@@ -6,13 +6,13 @@ use rand::Rng;
 use statrs::distribution::Normal;
 
 const ASTEROID_IRREGULARITY: f64 = 1.0; // (0, 1]
-const ASTEROID_SPIKEYNES: f64 = 1.0; // (0, 1]
+const ASTEROID_SPIKEYNES: f64 = 0.5; // (0, 1]
 
 /// Generates normalized polygon points that should be used to build collider of asteroid
 pub fn generate_asteroid_vectors() -> Vec<Vec2> {
     let mut rng = rand::thread_rng();
 
-    let edges_count = rng.gen_range(5..10);
+    let edges_count = rng.gen_range(8..15);
     let mut out_points = Vec::with_capacity(edges_count);
 
     let mut current_angle = 0.0;
