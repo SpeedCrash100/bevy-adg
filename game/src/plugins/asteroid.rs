@@ -10,8 +10,10 @@ use crate::{
         asteroid::{Asteroid, AsteroidBuilder, AsteroidSizeLevel},
         common::Despawn,
         health::Dead,
+        player::Player,
     },
     entity::EntityBuildDirector,
+    math::Position,
     random::Deviate,
     stages::LivingStages,
 };
@@ -47,6 +49,7 @@ fn asteroids_spawn_system(
     window: Res<Windows>,
     asteroids_count: Res<AsteroidCount>,
     asteroids: Query<(), With<Asteroid>>,
+    player: Query<&Transform, With<Player>>,
 ) {
     let window = window.get_primary().unwrap();
 
@@ -57,8 +60,10 @@ fn asteroids_spawn_system(
     let asteroid_spawned = asteroids.iter().count();
     let mut rng = rand::thread_rng();
 
+    let player_position = player.single().position();
+
     if asteroid_spawned < asteroids_count.0 {
-        let center_position = Vec2::ZERO;
+        let center_position = player_position;
 
         let range_from_border = rng.gen_range(MIN_SPAWN_RANGE..MAX_SPAWN_RANGE);
         let angle: f32 = rng.gen_range(0.0..(2.0 * PI));
