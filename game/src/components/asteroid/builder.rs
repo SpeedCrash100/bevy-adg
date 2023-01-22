@@ -7,7 +7,12 @@ use physic_objects::prelude::*;
 use super::generate::generate_asteroid_vectors;
 use super::level::AsteroidSizeLevel;
 use super::Asteroid;
+use crate::components::health::{CollisionDamageBundle, Health};
 use crate::entity::EntityBuilder;
+use crate::random::Deviate;
+
+const ASTEROID_ANGULAR_SPEED_DEVIATION: f64 = 0.3;
+const ASTEROID_LINEAR_SPEED_DEVIATION: f64 = 5.0;
 
 #[derive(Builder)]
 pub struct AsteroidCreateInfo {
@@ -15,6 +20,9 @@ pub struct AsteroidCreateInfo {
     position: Vec2,
     #[builder(default = "3")]
     size_level: i32,
+
+    #[builder(default = "Vec2::ZERO")]
+    base_velocity: Vec2,
 }
 
 impl EntityBuilder for AsteroidCreateInfoBuilder {
@@ -42,16 +50,20 @@ impl EntityBuilder for AsteroidCreateInfoBuilder {
             .points(asteroid_structure)
             .build();
 
+        let mut rng = rand::thread_rng();
         commands.insert(physic_object).insert(Velocity {
-            angvel: 1.0,
-            linvel: Vec2::ZERO,
+            angvel: 0.0_f32.deviate(&mut rng, ASTEROID_ANGULAR_SPEED_DEVIATION),
+            linvel: create_info.base_velocity
+                + Vec2::ZERO.deviate(&mut rng, ASTEROID_LINEAR_SPEED_DEVIATION),
         });
 
         let transform = Transform::from_translation(create_info.position.extend(0.0));
 
         commands
             .insert(Asteroid)
+            .insert(Health::new(asteroid_level.max_health()))
             .insert(asteroid_level)
             .insert(TransformBundle::from_transform(transform))
+            .insert(CollisionDamageBundle::new())
     }
 }

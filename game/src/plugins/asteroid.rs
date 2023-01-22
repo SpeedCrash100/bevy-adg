@@ -2,22 +2,24 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::Velocity;
+use physic_objects::PhysicObjectBundle;
 use rand::Rng;
 
 use crate::{
-    components::asteroid::{Asteroid, AsteroidBuilder},
+    components::{
+        asteroid::{Asteroid, AsteroidBuilder, AsteroidSizeLevel},
+        common::Despawn,
+        health::Dead,
+    },
     entity::EntityBuildDirector,
     random::Deviate,
+    stages::LivingStages,
 };
 
 /// Minimal range from screen border to spawn asteroid
 const MIN_SPAWN_RANGE: f32 = 200.0;
 /// Maximum range from screen border to spawn asteroid
 const MAX_SPAWN_RANGE: f32 = 1200.0;
-/// Deviation
-const VELOCITY_DEVIATION: f64 = 5.0;
-/// Deviation
-const ANGULAR_VELOCITY_DEVIATION: f64 = 1.0;
 
 /// Target Asteroid count in world
 #[derive(Resource)]
@@ -34,7 +36,8 @@ pub struct AsteroidsPlugin;
 impl Plugin for AsteroidsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AsteroidCount>()
-            .add_system(asteroids_spawn_system);
+            .add_system(asteroids_spawn_system)
+            .add_system_to_stage(LivingStages::DeadProcessing, asteroid_dead);
     }
 }
 
@@ -62,20 +65,69 @@ fn asteroids_spawn_system(
         let position = Quat::from_rotation_z(angle).mul_vec3(Vec3::Y).truncate()
             * (radius_diagonal + range_from_border);
 
-        let velocity = Vec2::ZERO.deviate(&mut rng, VELOCITY_DEVIATION);
-
         let size_level = rng.gen_range(1..5);
 
         let mut builder = AsteroidBuilder::default();
-        let created_entity = commands.build_entity(
+        commands.build_entity(
             builder
                 .position(position + center_position)
-                .size_level(size_level),
+                .size_level(size_level)
+                .base_velocity(Vec2::ZERO),
         );
+    }
+}
 
-        commands.entity(created_entity).insert(Velocity {
-            angvel: (0.0 as f32).deviate(&mut rng, ANGULAR_VELOCITY_DEVIATION),
-            linvel: velocity,
-        });
+fn asteroid_dead(
+    mut commands: Commands,
+    q_deads: Query<
+        (&AsteroidSizeLevel, &Transform, &Velocity, Entity),
+        (With<Asteroid>, With<Dead>),
+    >,
+) {
+    if q_deads.is_empty() {
+        return;
+    }
+
+    let mut rng = rand::thread_rng();
+
+    for (size, transform, parent_velocity, entity) in q_deads.iter() {
+        commands
+            .entity(entity)
+            .remove::<PhysicObjectBundle>()
+            .insert(Despawn::Normal);
+
+        // Do not create zero sized asteroids
+        if size.level() <= 1 {
+            continue;
+        }
+
+        let shard_count = rng.gen_range(2..=4);
+
+        let mut velocity_angle = 0.0;
+        let velocity_angle_step = 2.0 * PI / shard_count as f32;
+        let velocity_angle_deviation = 2.0 * PI / shard_count as f32 / 3.0; // 3.0 - is 3 sigma rule for normal distribution
+
+        for _ in 0..shard_count {
+            //
+            let mutated_velocity_angle =
+                velocity_angle.deviate(&mut rng, velocity_angle_deviation as f64);
+            let velocity = Quat::from_rotation_z(mutated_velocity_angle)
+                .mul_vec3(Vec3::Y)
+                .truncate()
+                * 50.0;
+            let position = transform.translation.truncate();
+            let size_level = size.level() - 1;
+
+            let mut builder = AsteroidBuilder::default();
+            builder
+                .position(position + velocity.normalize() * size.typical_radius())
+                .size_level(size_level)
+                .base_velocity(parent_velocity.linvel);
+
+            commands.build_entity(&builder);
+
+            //
+            velocity_angle += velocity_angle_step;
+        }
     }
 }
