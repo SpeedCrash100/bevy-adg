@@ -8,7 +8,7 @@ use rand::Rng;
 use crate::{
     components::{
         asteroid::{Asteroid, AsteroidBuilder, AsteroidSizeLevel},
-        common::Despawn,
+        common::{Despawn, DespawnOn},
         health::Dead,
         player::Player,
     },
@@ -73,12 +73,16 @@ fn asteroids_spawn_system(
         let size_level = rng.gen_range(1..5);
 
         let mut builder = AsteroidBuilder::default();
-        commands.build_entity(
+        let created_entity = commands.build_entity(
             builder
                 .position(position + center_position)
                 .size_level(size_level)
                 .base_velocity(Vec2::ZERO),
         );
+
+        commands
+            .entity(created_entity)
+            .insert(DespawnOn::OutOfRange(1.5 * MAX_SPAWN_RANGE));
     }
 }
 

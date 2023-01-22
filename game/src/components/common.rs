@@ -10,3 +10,13 @@ pub enum Despawn {
     Normal,
     Recursive,
 }
+
+/// Mark entity to despawn if something happens
+#[derive(Component)]
+pub enum DespawnOn {
+    /// If an entity is at a distance greate than the specified value, then entity must despawn
+    ///
+    /// # Warning
+    /// Entities without [Transform](bevy::prelude::Component) component will be ignored
+    OutOfRange(f32),
+}

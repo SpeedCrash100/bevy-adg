@@ -7,6 +7,7 @@ use physic_objects::prelude::*;
 use super::generate::generate_asteroid_vectors;
 use super::level::AsteroidSizeLevel;
 use super::Asteroid;
+use crate::components::common::DespawnOn;
 use crate::components::health::{CollisionDamageBundle, Health};
 use crate::entity::EntityBuilder;
 use crate::random::Deviate;
