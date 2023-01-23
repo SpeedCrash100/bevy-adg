@@ -43,3 +43,23 @@ impl Angle for Transform {
         Vec2::X.angle_between(dir)
     }
 }
+
+impl Position for GlobalTransform {
+    fn position(&self) -> Vec2 {
+        self.translation().truncate()
+    }
+}
+
+impl Angle for GlobalTransform {
+    fn angle(&self) -> f32 {
+        let (_, rotation, _) = self.to_scale_rotation_translation();
+        rotation.angle()
+    }
+}
+
+impl Angle for Quat {
+    fn angle(&self) -> f32 {
+        let dir = self.mul_vec3(Vec3::X).truncate();
+        Vec2::X.angle_between(dir)
+    }
+}

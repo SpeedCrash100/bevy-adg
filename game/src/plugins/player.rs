@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 
+use crate::components::common::Active;
 use crate::components::engine::{Engine, MainEngine, SwayEngine};
 use crate::components::player::{Player, PlayerDecorator};
 use crate::components::ship::control::rotation::ShipTargetViewPoint;
 use crate::components::ship::SimpleShipBuilder;
+use crate::components::weapon::Weapon;
 use crate::entity::EntityBuildDirector;
 
 #[derive(Component)]
@@ -23,7 +25,8 @@ impl Plugin for PlayerPlugin {
                     .with_system(throttle_forward)
                     .with_system(throttle_backward)
                     .with_system(sway_left)
-                    .with_system(sway_right),
+                    .with_system(sway_right)
+                    .with_system(fire_main),
             );
     }
 }
@@ -167,5 +170,30 @@ fn sway_left(
         engine.throttle_down(1.0);
     } else if key_state.just_released(KeyCode::A) || key_state.just_released(KeyCode::Left) {
         engine.throttle_up(1.0);
+    }
+}
+
+fn fire_main(
+    key_state: Res<Input<MouseButton>>,
+    q_player: Query<&Children, With<Player>>,
+    q_weapon: Query<Entity, With<Weapon>>,
+    mut commands: Commands,
+) {
+    let children = q_player.single();
+
+    let weapon_option = children
+        .iter()
+        .find(|e| q_weapon.contains(**e))
+        .and_then(|e| Some(q_weapon.get(*e).unwrap()));
+
+    let Some(weapon) = weapon_option else {
+        warn!("Player doesn't have main weapon");
+        return;
+    };
+
+    if key_state.just_pressed(MouseButton::Left) {
+        commands.entity(weapon).insert(Active);
+    } else if key_state.just_released(MouseButton::Left) {
+        commands.entity(weapon).remove::<Active>();
     }
 }

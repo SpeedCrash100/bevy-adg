@@ -10,3 +10,5 @@ pub mod physics;
 pub mod player;
 /// Adds ship processing system
 pub mod ship;
+/// Adds weapons processing system
+pub mod weapon;

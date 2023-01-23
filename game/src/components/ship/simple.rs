@@ -4,6 +4,7 @@ use bevy_rapier2d::prelude::{ColliderMassProperties, RigidBody};
 use physic_objects::prelude::*;
 
 use crate::components::engine::{MainEngineBuilder, RotationEngineBuilder, SwayEngineBuilder};
+use crate::components::weapon::machinegun::MachineGunBuilder;
 use crate::entity::{EntityBuildDirector, EntityBuilder};
 use crate::math::RotateAroundZ;
 
@@ -58,6 +59,13 @@ impl EntityBuilder for ShipCreateInfoBuilder {
             })
             .with_children(|cb| {
                 cb.build_entity(SwayEngineBuilder::default().force(1_000_000.0));
+            })
+            .with_children(|cb| {
+                cb.build_entity(
+                    MachineGunBuilder::default()
+                        .firerate(4.0)
+                        .position(Vec2::X * 33.0),
+                );
             });
 
         EntityBuilder::build(&RotationControlBuilder::default(), commands)
