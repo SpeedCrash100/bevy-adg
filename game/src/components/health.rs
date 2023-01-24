@@ -50,7 +50,7 @@ impl CollisionDamageBundle {
         Self {
             mark: CollisionDamage,
             events: ActiveEvents::CONTACT_FORCE_EVENTS,
-            threshold: ContactForceEventThreshold(1_000_000.0),
+            threshold: ContactForceEventThreshold(100_000.0),
         }
     }
 }

@@ -55,7 +55,7 @@ fn damage_collided_entities(
         let mut first_hp = entities.swap_remove(0);
         let mut second_hp = entities.swap_remove(0);
 
-        let impulse = e.total_force_magnitude / 1_000_000.0;
+        let impulse = e.total_force_magnitude / 100_000.0;
 
         first_hp.damage(impulse);
         second_hp.damage(impulse);

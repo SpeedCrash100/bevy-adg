@@ -12,3 +12,6 @@ pub mod player;
 pub mod ship;
 /// Adds weapons processing system
 pub mod weapon;
+
+/// Adds displayable information on entities with its health
+pub mod healthdisplay;
