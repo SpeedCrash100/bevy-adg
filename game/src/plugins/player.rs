@@ -1,12 +1,15 @@
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::Velocity;
 
 use crate::components::common::Active;
 use crate::components::engine::{Engine, MainEngine, SwayEngine};
+use crate::components::health::{Dead, Regenerate};
 use crate::components::player::{Player, PlayerDecorator};
 use crate::components::ship::control::rotation::ShipTargetViewPoint;
-use crate::components::ship::SimpleShipBuilder;
+use crate::components::ship::{Ship, SimpleShipBuilder};
 use crate::components::weapon::Weapon;
 use crate::entity::EntityBuildDirector;
+use crate::stages::LivingStages;
 
 #[derive(Component)]
 pub struct MainCamera;
@@ -27,7 +30,8 @@ impl Plugin for PlayerPlugin {
                     .with_system(sway_left)
                     .with_system(sway_right)
                     .with_system(fire_main),
-            );
+            )
+            .add_system_to_stage(LivingStages::DeadProcessing, player_dead_handler);
     }
 }
 
@@ -195,5 +199,19 @@ fn fire_main(
         commands.entity(weapon).insert(Active);
     } else if key_state.just_released(MouseButton::Left) {
         commands.entity(weapon).remove::<Active>();
+    }
+}
+
+fn player_dead_handler(
+    mut commands: Commands,
+    mut q_ships: Query<
+        (Entity, &mut Transform, &mut Velocity),
+        (With<Dead>, With<Ship>, With<Player>),
+    >,
+) {
+    for (entity, mut transform, mut velocity) in q_ships.iter_mut() {
+        commands.entity(entity).insert(Regenerate::OneTimeToFull);
+        *transform = Transform::from_translation(Vec3::ZERO);
+        *velocity = Velocity::linear(Vec2::ZERO);
     }
 }

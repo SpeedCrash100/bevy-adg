@@ -34,6 +34,43 @@ impl Health {
     }
 }
 
+/// Allow to set max health point of object so it can regenerate to it
+#[derive(Component)]
+pub struct MaxHealth(f32);
+
+impl MaxHealth {
+    pub fn new(max_health: f32) -> Self {
+        Self(max_health)
+    }
+
+    pub fn max_health(&self) -> f32 {
+        self.0
+    }
+}
+
+/// Allow entity to regenerate health to max
+#[derive(Component)]
+pub enum Regenerate {
+    /// Regenerate to full on next tick
+    OneTimeToFull,
+}
+
+/// Adds fully healed entity with specified health
+#[derive(Bundle)]
+pub struct HealthBundle {
+    health: Health,
+    max_health: MaxHealth,
+}
+
+impl HealthBundle {
+    pub fn new(health: f32) -> Self {
+        Self {
+            health: Health::new(health),
+            max_health: MaxHealth::new(health),
+        }
+    }
+}
+
 /// Mark that entity takes damage by collision with other objects
 #[derive(Component)]
 pub struct CollisionDamage;

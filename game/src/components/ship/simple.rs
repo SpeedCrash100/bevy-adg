@@ -4,6 +4,7 @@ use bevy_rapier2d::prelude::{ColliderMassProperties, RigidBody};
 use physic_objects::prelude::*;
 
 use crate::components::engine::{MainEngineBuilder, RotationEngineBuilder, SwayEngineBuilder};
+use crate::components::health::{CollisionDamageBundle, HealthBundle};
 use crate::components::weapon::machinegun::MachineGunBuilder;
 use crate::entity::{EntityBuildDirector, EntityBuilder};
 use crate::math::RotateAroundZ;
@@ -48,6 +49,8 @@ impl EntityBuilder for ShipCreateInfoBuilder {
         let commands = commands
             .insert(Ship)
             .insert(physic_object)
+            .insert(HealthBundle::new(10000.0))
+            .insert(CollisionDamageBundle::new())
             .insert(TransformBundle::from(Transform::from_translation(
                 create_info.position.extend(0.0),
             )))

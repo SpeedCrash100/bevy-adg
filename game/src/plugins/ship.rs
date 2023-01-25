@@ -1,17 +1,22 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+use crate::components::common::Despawn;
 use crate::components::engine::{Engine, RotationEngine};
+use crate::components::health::Dead;
+use crate::components::player::Player;
 use crate::components::ship::control::rotation::{RotationControl, ShipTargetViewPoint};
 use crate::components::ship::Ship;
 use crate::math::{Angle, Position, RotateAroundZ};
+use crate::stages::LivingStages;
 
 pub struct ShipPlugin;
 
 impl Plugin for ShipPlugin {
     fn build(&self, app: &mut App) {
         app.add_system(ship_rotate_to_target)
-            .add_system(ship_engine_process);
+            .add_system(ship_engine_process)
+            .add_system_to_stage(LivingStages::DeadProcessing, ship_dead_handler);
     }
 }
 
@@ -53,5 +58,15 @@ fn ship_engine_process(
         };
 
         *force = engine.force().rotate_z(parent_transform.angle());
+    }
+}
+
+/// This handler nust ignore Player
+fn ship_dead_handler(
+    mut commands: Commands,
+    q_ships: Query<Entity, (With<Dead>, With<Ship>, Without<Player>)>,
+) {
+    for entity in q_ships.iter() {
+        commands.entity(entity).insert(Despawn::Recursive);
     }
 }

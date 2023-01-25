@@ -3,10 +3,16 @@ use bevy::prelude::*;
 use crate::{
     components::{
         common::Despawn,
-        health::{Dead, Health},
+        health::{Dead, Health, MaxHealth, Regenerate},
     },
     stages::LivingStages,
 };
+
+#[derive(SystemLabel)]
+pub struct DeadMarkInserterSystemSet;
+
+#[derive(SystemLabel)]
+pub struct RegenerateSystemSet;
 
 pub struct LivingPlugin;
 
@@ -30,8 +36,35 @@ impl Plugin for LivingPlugin {
             SystemStage::parallel(),
         );
 
-        app.add_system_to_stage(LivingStages::HealthProcessing, dead_mark_inserter);
+        app.add_system_set_to_stage(
+            LivingStages::HealthProcessing,
+            SystemSet::new()
+                .label(RegenerateSystemSet)
+                .with_system(regenerate_one_time),
+        );
+
+        app.add_system_set_to_stage(
+            LivingStages::HealthProcessing,
+            SystemSet::new()
+                .label(DeadMarkInserterSystemSet)
+                .after(RegenerateSystemSet)
+                .with_system(dead_mark_inserter),
+        );
+
         app.add_system_to_stage(LivingStages::DespawnProcessing, despawn_entities);
+    }
+}
+
+fn regenerate_one_time(
+    mut commands: Commands,
+    mut q_entity: Query<(&mut Health, &MaxHealth, &Regenerate, Entity)>,
+) {
+    for (mut hp, max_hp, regen_enum, entity) in q_entity.iter_mut() {
+        let Regenerate::OneTimeToFull = regen_enum;
+
+        *hp = Health::new(max_hp.max_health());
+        commands.entity(entity).remove::<Regenerate>();
+        commands.entity(entity).remove::<Dead>();
     }
 }
 

@@ -6,6 +6,9 @@ edition = "2021"
 [[bin]]
 name = "game"
 
+[features]
+debug = ["debug_hp"]
+debug_hp = []
 
 [dependencies]
 bevy = "0.9"
