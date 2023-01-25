@@ -43,7 +43,7 @@ impl EntityBuilder for BulletBuilder {
             .insert(physic_object)
             .insert(Ccd::enabled())
             .insert(DespawnOn::OutOfRange(4000.0))
-            .insert(Health::new(info.radius * info.density))
+            .insert(Health::new(info.radius * info.density * 1.5))
             .insert(CollisionDamageBundle::new())
     }
 }
