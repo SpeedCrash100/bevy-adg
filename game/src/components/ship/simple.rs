@@ -3,6 +3,7 @@ use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::{ColliderMassProperties, RigidBody};
 use physic_objects::prelude::*;
 
+use crate::components::common::{Layer, PositionBundle};
 use crate::components::engine::{MainEngineBuilder, RotationEngineBuilder, SwayEngineBuilder};
 use crate::components::health::{CollisionDamageBundle, HealthBundle};
 use crate::components::weapon::machinegun::MachineGunBuilder;
@@ -51,9 +52,7 @@ impl EntityBuilder for ShipCreateInfoBuilder {
             .insert(physic_object)
             .insert(HealthBundle::new(10000.0))
             .insert(CollisionDamageBundle::new())
-            .insert(TransformBundle::from(Transform::from_translation(
-                create_info.position.extend(0.0),
-            )))
+            .insert(PositionBundle::new(create_info.position, Layer::Main))
             .with_children(|cb| {
                 cb.build_entity(RotationEngineBuilder::default().torque(50_000_000.0_f32));
             })

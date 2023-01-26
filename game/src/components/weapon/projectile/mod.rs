@@ -1,7 +1,10 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
 use bevy_rapier2d::prelude::Velocity;
 
-use crate::entity::EntityBuilder;
+use crate::{
+    components::common::{Layer, PositionBundle},
+    entity::EntityBuilder,
+};
 
 /// Simple bullet implementation. It deals damage by collision
 pub mod bullet;
@@ -35,9 +38,7 @@ impl EntityBuilder for ProjectileDecorator {
         let info = self.build().unwrap();
         commands
             .insert(Velocity::linear(info.velocity))
-            .insert(TransformBundle::from(Transform::from_translation(
-                info.position.extend(0.0),
-            )))
+            .insert(PositionBundle::new(info.position, Layer::Main))
     }
 }
 

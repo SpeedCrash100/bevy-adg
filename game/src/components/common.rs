@@ -20,3 +20,37 @@ pub enum DespawnOn {
     /// Entities without [Transform](bevy::prelude::Component) component will be ignored
     OutOfRange(f32),
 }
+
+#[derive(Component, Clone, Copy)]
+#[repr(i32)]
+pub enum Layer {
+    // Backgrounds layers
+    BackgroundLow,
+    BackgroundMiddle,
+    BackgroundHigh,
+
+    Main,
+}
+
+impl From<Layer> for f32 {
+    fn from(value: Layer) -> Self {
+        value as i32 as f32
+    }
+}
+
+#[derive(Bundle)]
+pub struct PositionBundle {
+    transform: TransformBundle,
+    layer: Layer,
+}
+
+impl PositionBundle {
+    pub fn new(position: Vec2, layer: Layer) -> Self {
+        Self {
+            transform: TransformBundle::from(Transform::from_translation(
+                position.extend(layer.into()),
+            )),
+            layer,
+        }
+    }
+}

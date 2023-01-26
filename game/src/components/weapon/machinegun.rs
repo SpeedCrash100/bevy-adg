@@ -1,5 +1,6 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
 
+use crate::components::common::{Layer, PositionBundle};
 use crate::entity::EntityBuilder;
 
 use super::projectile::bullet::BulletBuilder;
@@ -32,8 +33,6 @@ impl EntityBuilder for MachineGunBuilder {
             .insert(MachineGun)
             .insert(Weapon::new(info.firerate, 500.0, 0.05))
             .insert(ProjectileCreator::new(bullet_gen))
-            .insert(TransformBundle::from(Transform::from_translation(
-                info.position.extend(0.0),
-            )))
+            .insert(PositionBundle::new(info.position, Layer::Main))
     }
 }

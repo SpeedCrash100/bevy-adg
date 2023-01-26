@@ -5,7 +5,7 @@ use bevy_parallax::{
 };
 
 use crate::{
-    components::{camera::MainCamera, player::Player},
+    components::{camera::MainCamera, common::Layer, player::Player},
     math::Position,
 };
 
@@ -25,7 +25,7 @@ impl Plugin for BackgroundPlugin {
                 cols: 1,
                 rows: 1,
                 scale: 1.0,
-                z: 0.0,
+                z: Layer::BackgroundLow.into(),
                 ..default()
             }]))
             .add_startup_system(create_parallax_camera)

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::Velocity;
 
 use crate::components::camera::MainCamera;
-use crate::components::common::Active;
+use crate::components::common::{Active, Layer, PositionBundle};
 use crate::components::engine::{Engine, MainEngine, SwayEngine};
 use crate::components::health::{Dead, Regenerate};
 use crate::components::player::{Player, PlayerDecorator};
@@ -186,14 +186,13 @@ fn fire_main(
 
 fn player_dead_handler(
     mut commands: Commands,
-    mut q_ships: Query<
-        (Entity, &mut Transform, &mut Velocity),
-        (With<Dead>, With<Ship>, With<Player>),
-    >,
+    mut q_ships: Query<Entity, (With<Dead>, With<Ship>, With<Player>)>,
 ) {
-    for (entity, mut transform, mut velocity) in q_ships.iter_mut() {
-        commands.entity(entity).insert(Regenerate::OneTimeToFull);
-        *transform = Transform::from_translation(Vec3::ZERO);
-        *velocity = Velocity::linear(Vec2::ZERO);
+    for entity in q_ships.iter_mut() {
+        commands
+            .entity(entity)
+            .insert(Regenerate::OneTimeToFull)
+            .insert(PositionBundle::new(Vec2::ZERO, Layer::Main))
+            .insert(Velocity::zero());
     }
 }

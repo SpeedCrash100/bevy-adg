@@ -35,7 +35,7 @@ impl EntityBuilder for BulletBuilder {
                 body: RigidBody::Dynamic,
                 mass_properties: ColliderMassProperties::Density(info.density),
             })
-            .draw_mode(DrawMode::Fill(FillMode::color(Color::BLACK)))
+            .draw_mode(DrawMode::Fill(FillMode::color(Color::GOLD)))
             .build();
 
         commands

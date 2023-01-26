@@ -7,6 +7,7 @@ use physic_objects::prelude::*;
 use super::generate::generate_asteroid_vectors;
 use super::level::AsteroidSizeLevel;
 use super::Asteroid;
+use crate::components::common::{Layer, PositionBundle};
 use crate::components::health::{CollisionDamageBundle, Health};
 use crate::entity::EntityBuilder;
 use crate::random::Deviate;
@@ -57,13 +58,13 @@ impl EntityBuilder for AsteroidCreateInfoBuilder {
                 + Vec2::ZERO.deviate(&mut rng, ASTEROID_LINEAR_SPEED_DEVIATION),
         });
 
-        let transform = Transform::from_translation(create_info.position.extend(0.0));
+        let transform = PositionBundle::new(create_info.position, Layer::Main);
 
         commands
             .insert(Asteroid)
             .insert(Health::new(asteroid_level.max_health()))
             .insert(asteroid_level)
-            .insert(TransformBundle::from_transform(transform))
+            .insert(transform)
             .insert(CollisionDamageBundle::new())
     }
 }
