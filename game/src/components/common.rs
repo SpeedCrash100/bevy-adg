@@ -12,7 +12,7 @@ pub enum Despawn {
 }
 
 /// Mark entity to despawn if something happens
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub enum DespawnOn {
     /// If an entity is at a distance greate than the specified value, then entity must despawn
     ///

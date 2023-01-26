@@ -12,6 +12,7 @@ debug_hp = []
 
 [dependencies]
 bevy = "0.9"
+bevy-parallax = { git = "https://github.com/Corrosive-Games/bevy-parallax.git", version = "0.3" }
 bevy_prototype_lyon = "0.7"
 bevy_rapier2d = "0.20"
 derive_builder = "0.12.0"

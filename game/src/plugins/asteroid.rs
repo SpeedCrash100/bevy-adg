@@ -12,7 +12,7 @@ use crate::{
         health::Dead,
         player::Player,
     },
-    entity::EntityBuildDirector,
+    entity::{ComponentInjectorBuilder, EntityBuildDirector},
     math::Position,
     random::Deviate,
     stages::LivingStages,
@@ -132,6 +132,11 @@ fn asteroid_dead(
                 .position(position + velocity.normalize() * size.typical_radius())
                 .size_level(size_level)
                 .base_velocity(parent_velocity.linvel);
+
+            let builder = ComponentInjectorBuilder::new(
+                builder,
+                DespawnOn::OutOfRange(1.5 * MAX_SPAWN_RANGE),
+            );
 
             commands.build_entity(&builder);
 

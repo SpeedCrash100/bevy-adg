@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::Velocity;
 
+use crate::components::camera::MainCamera;
 use crate::components::common::Active;
 use crate::components::engine::{Engine, MainEngine, SwayEngine};
 use crate::components::health::{Dead, Regenerate};
@@ -11,16 +12,11 @@ use crate::components::weapon::Weapon;
 use crate::entity::EntityBuildDirector;
 use crate::stages::LivingStages;
 
-#[derive(Component)]
-pub struct MainCamera;
-
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(create_camera)
-            .add_startup_system(create_player_ship)
-            .add_system(camera_follow_player)
+        app.add_startup_system(create_player_ship)
             .add_system_set(
                 SystemSet::new()
                     .label("Player control handling")
@@ -35,24 +31,10 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-pub fn create_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default()).insert(MainCamera);
-}
-
 fn create_player_ship(mut commands: Commands) {
     let ship_builder = SimpleShipBuilder::default();
     let player_ship_builder = PlayerDecorator::new(ship_builder);
     commands.build_entity(&player_ship_builder);
-}
-
-fn camera_follow_player(
-    mut q_camera: Query<&mut Transform, With<MainCamera>>,
-    q_player: Query<&Transform, (With<Player>, Without<MainCamera>)>,
-) {
-    let player_transform = q_player.single();
-    let mut camera_transform = q_camera.single_mut();
-
-    camera_transform.translation = player_transform.translation.truncate().extend(999.9);
 }
 
 fn handle_mouse_controls(

@@ -1,5 +1,7 @@
 /// Adds astroid spawning/despawning in world
 pub mod asteroid;
+/// Adds background to game
+pub mod background;
 /// Adds despawn options for objects by using [DespawnOn](crate::components::common::DespawnOn) mark
 pub mod despawn;
 /// Adds hud to screen

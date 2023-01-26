@@ -192,6 +192,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy-parallax"
+version = "0.3.0"
+source = "git+https://github.com/Corrosive-Games/bevy-parallax.git#c55232c96c9181a42ab7986e60102f321ac974b1"
+dependencies = [
+ "bevy",
+ "serde",
+]
+
+[[package]]
 name = "bevy_animation"
 version = "0.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1569,6 +1578,7 @@ name = "game"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "bevy-parallax",
  "bevy_prototype_lyon",
  "bevy_rapier2d",
  "derive_builder",

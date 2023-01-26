@@ -17,6 +17,7 @@ pub fn run() {
     // base compnents
     app.add_plugins(DefaultPlugins)
         .add_plugin(PhysicObjectPlugin)
+        .add_plugin(plugins::background::BackgroundPlugin)
         .add_plugin(plugins::physics::PhysicsPlugin)
         .add_plugin(plugins::living::LivingPlugin)
         .add_plugin(plugins::despawn::DespawnPlugin)
