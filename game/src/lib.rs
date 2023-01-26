@@ -23,7 +23,8 @@ pub fn run() {
         .add_plugin(plugins::asteroid::AsteroidsPlugin)
         .add_plugin(plugins::ship::ShipPlugin)
         .add_plugin(plugins::player::PlayerPlugin)
-        .add_plugin(plugins::weapon::WeaponPlugin);
+        .add_plugin(plugins::weapon::WeaponPlugin)
+        .add_plugin(plugins::hud::HudPlugin);
 
     // Debug only components
     if cfg!(feature = "debug_hp") {
