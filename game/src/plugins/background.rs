@@ -18,16 +18,38 @@ impl Plugin for BackgroundPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(ParallaxPlugin)
             .init_resource::<PlayerPreviousPosition>()
-            .insert_resource(ParallaxResource::new(vec![LayerData {
-                speed: LayerSpeed::Bidirectional(0.1, 0.1),
-                path: "images/back.png".to_string(),
-                tile_size: Vec2::new(256.0, 256.0),
-                cols: 1,
-                rows: 1,
-                scale: 1.0,
-                z: Layer::BackgroundLow.into(),
-                ..default()
-            }]))
+            .insert_resource(ParallaxResource::new(vec![
+                LayerData {
+                    speed: LayerSpeed::Bidirectional(0.9, 0.9),
+                    path: "images/back.png".to_string(),
+                    tile_size: Vec2::new(256.0, 256.0),
+                    cols: 1,
+                    rows: 1,
+                    scale: 1.0,
+                    z: Layer::BackgroundLow.into(),
+                    ..default()
+                },
+                LayerData {
+                    speed: LayerSpeed::Bidirectional(0.8, 0.8),
+                    path: "images/middle.png".to_string(),
+                    tile_size: Vec2::new(256.0, 256.0),
+                    cols: 1,
+                    rows: 1,
+                    scale: 1.0,
+                    z: Layer::BackgroundMiddle.into(),
+                    ..default()
+                },
+                LayerData {
+                    speed: LayerSpeed::Bidirectional(0.5, 0.5),
+                    path: "images/front.png".to_string(),
+                    tile_size: Vec2::new(256.0, 256.0),
+                    cols: 1,
+                    rows: 1,
+                    scale: 1.0,
+                    z: Layer::BackgroundHigh.into(),
+                    ..default()
+                },
+            ]))
             .add_startup_system(create_parallax_camera)
             .add_system(camera_follow_player);
     }
