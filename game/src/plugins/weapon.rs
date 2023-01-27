@@ -14,15 +14,23 @@ use crate::{
     math::{Angle, Position, RotateAroundZ},
     random::Deviate,
     stages::LivingStages,
+    states::GameState,
 };
 
 pub struct WeaponPlugin;
 
 impl Plugin for WeaponPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(weapon_update)
-            .add_system(fire_weapon)
+        app.add_system_set(Self::update_weapons())
             .add_system_to_stage(LivingStages::DeadProcessing, despawn_dead_projectiles);
+    }
+}
+
+impl WeaponPlugin {
+    fn update_weapons() -> SystemSet {
+        SystemSet::on_update(GameState::InGame)
+            .with_system(weapon_update)
+            .with_system(fire_weapon)
     }
 }
 

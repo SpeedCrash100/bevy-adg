@@ -9,14 +9,22 @@ use crate::components::ship::control::rotation::{RotationControl, ShipTargetView
 use crate::components::ship::Ship;
 use crate::math::{Angle, Position, RotateAroundZ};
 use crate::stages::LivingStages;
+use crate::states::GameState;
 
 pub struct ShipPlugin;
 
 impl Plugin for ShipPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(ship_rotate_to_target)
-            .add_system(ship_engine_process)
+        app.add_system_set(Self::ship_update())
             .add_system_to_stage(LivingStages::DeadProcessing, ship_dead_handler);
+    }
+}
+
+impl ShipPlugin {
+    fn ship_update() -> SystemSet {
+        SystemSet::on_update(GameState::InGame)
+            .with_system(ship_rotate_to_target)
+            .with_system(ship_engine_process)
     }
 }
 

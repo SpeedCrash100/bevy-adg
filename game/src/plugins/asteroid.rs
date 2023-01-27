@@ -16,6 +16,7 @@ use crate::{
     math::Position,
     random::Deviate,
     stages::LivingStages,
+    states::GameState,
 };
 
 /// Minimal range from screen border to spawn asteroid
@@ -38,8 +39,18 @@ pub struct AsteroidsPlugin;
 impl Plugin for AsteroidsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AsteroidCount>()
-            .add_system(asteroids_spawn_system)
-            .add_system_to_stage(LivingStages::DeadProcessing, asteroid_dead);
+            .add_system_set(Self::spawn_asteroid_systems())
+            .add_system_set_to_stage(LivingStages::DeadProcessing, Self::dead_handling());
+    }
+}
+
+impl AsteroidsPlugin {
+    fn spawn_asteroid_systems() -> SystemSet {
+        SystemSet::on_update(GameState::InGame).with_system(asteroids_spawn_system)
+    }
+
+    fn dead_handling() -> SystemSet {
+        SystemSet::new().with_system(asteroid_dead)
     }
 }
 

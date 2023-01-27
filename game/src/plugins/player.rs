@@ -11,23 +11,27 @@ use crate::components::ship::{Ship, SimpleShipBuilder};
 use crate::components::weapon::Weapon;
 use crate::entity::EntityBuildDirector;
 use crate::stages::LivingStages;
+use crate::states::GameState;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(create_player_ship)
-            .add_system_set(
-                SystemSet::new()
-                    .label("Player control handling")
-                    .with_system(handle_mouse_controls)
-                    .with_system(throttle_forward)
-                    .with_system(throttle_backward)
-                    .with_system(sway_left)
-                    .with_system(sway_right)
-                    .with_system(fire_main),
-            )
+            .add_system_set(Self::player_controls())
             .add_system_to_stage(LivingStages::DeadProcessing, player_dead_handler);
+    }
+}
+
+impl PlayerPlugin {
+    fn player_controls() -> SystemSet {
+        SystemSet::on_update(GameState::InGame)
+            .with_system(handle_mouse_controls)
+            .with_system(throttle_forward)
+            .with_system(throttle_backward)
+            .with_system(sway_left)
+            .with_system(sway_right)
+            .with_system(fire_main)
     }
 }
 
