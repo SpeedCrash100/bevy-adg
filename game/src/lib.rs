@@ -1,4 +1,4 @@
-use bevy::prelude::{App, DefaultPlugins};
+use bevy::{prelude::*, window::Windows};
 use physic_objects::prelude::*;
 
 #[macro_use]
@@ -27,7 +27,8 @@ pub fn run() {
         .add_plugin(plugins::player::PlayerPlugin)
         .add_plugin(plugins::weapon::WeaponPlugin)
         .add_plugin(plugins::hud::HudPlugin)
-        .add_plugin(plugins::pause::PausePlugin);
+        .add_plugin(plugins::pause::PausePlugin)
+        .add_startup_system(set_to_fullscreen);
 
     // Debug only components
     if cfg!(feature = "debug_hp") {
@@ -36,4 +37,9 @@ pub fn run() {
 
     // Start up
     app.run();
+}
+
+fn set_to_fullscreen(mut window: ResMut<Windows>) {
+    let primary = window.primary_mut();
+    primary.set_mode(WindowMode::Fullscreen);
 }
