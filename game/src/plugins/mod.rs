@@ -8,6 +8,8 @@ pub mod despawn;
 pub mod hud;
 /// Adds living(entity with [Health]) processing: adds [Dead] marks so you can process what to do when object is dead
 pub mod living;
+/// Adds pause game
+pub mod pause;
 /// Adds physic to world: no gravity enviroments and ability to sum external forces of children
 pub mod physics;
 /// Adds player ship and controls for it

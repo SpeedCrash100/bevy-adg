@@ -10,6 +10,7 @@ mod math;
 mod plugins;
 mod random;
 mod stages;
+mod states;
 
 pub fn run() {
     let mut app = App::new();
@@ -25,7 +26,8 @@ pub fn run() {
         .add_plugin(plugins::ship::ShipPlugin)
         .add_plugin(plugins::player::PlayerPlugin)
         .add_plugin(plugins::weapon::WeaponPlugin)
-        .add_plugin(plugins::hud::HudPlugin);
+        .add_plugin(plugins::hud::HudPlugin)
+        .add_plugin(plugins::pause::PausePlugin);
 
     // Debug only components
     if cfg!(feature = "debug_hp") {
