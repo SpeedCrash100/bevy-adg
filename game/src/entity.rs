@@ -1,6 +1,6 @@
 use bevy::{
     ecs::system::{Commands, EntityCommands},
-    prelude::{Bundle, ChildBuilder, Entity},
+    prelude::{BuildChildren, Bundle, ChildBuilder, Entity},
 };
 
 /// Builds complex entity using provided commands
@@ -27,6 +27,29 @@ impl<'w, 's, 'a> EntityBuildDirector for ChildBuilder<'w, 's, 'a> {
     fn build_entity<B: EntityBuilder>(&mut self, builder: &B) -> Entity {
         let mut commands = self.spawn(());
         builder.build(&mut commands).id()
+    }
+}
+
+/// EntityChildBuildDirector use provided entity to construct child entity
+pub trait EntityChildBuildDirector {
+    type OutCommands;
+
+    fn build_child_entity<'c, B: EntityBuilder>(
+        &'c mut self,
+        builder: &B,
+    ) -> &'c mut Self::OutCommands;
+}
+
+impl<'w, 's, 'a> EntityChildBuildDirector for EntityCommands<'w, 's, 'a> {
+    type OutCommands = EntityCommands<'w, 's, 'a>;
+
+    fn build_child_entity<'c, B: EntityBuilder>(
+        &'c mut self,
+        builder: &B,
+    ) -> &'c mut Self::OutCommands {
+        self.with_children(|cs| {
+            cs.build_entity(builder);
+        })
     }
 }
 

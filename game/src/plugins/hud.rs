@@ -4,7 +4,7 @@ use crate::{
     components::{
         health::{Health, MaxHealth},
         player::Player,
-        ui::progressbar::*,
+        ui::{button::ButtonColorsConfig, progressbar::*},
     },
     entity::{ComponentInjectorBuilder, EntityBuildDirector, EntityBuilder},
 };
@@ -21,6 +21,7 @@ impl Plugin for HudPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(create_root_element)
             .add_system_to_stage(CoreStage::PostUpdate, progress_bar_update)
+            .add_system_set(Self::button_effects())
             .add_system(update_player_hp);
     }
 }
@@ -45,6 +46,10 @@ impl HudPlugin {
             .color_back(Color::WHITE);
 
         ComponentInjectorBuilder::new(progress_bar_builder, PlayerHP)
+    }
+
+    fn button_effects() -> SystemSet {
+        SystemSet::new().with_system(button_effects)
     }
 }
 
@@ -106,5 +111,20 @@ fn update_player_hp(
     for (mut value, mut max_hp) in q_progress_bars.iter_mut() {
         *max_hp = MaxValue(player_max_hp.max_health());
         *value = Value(player_hp.health());
+    }
+}
+
+fn button_effects(
+    mut button_query: Query<
+        (&Interaction, &mut BackgroundColor, &ButtonColorsConfig),
+        With<Button>,
+    >,
+) {
+    for (interaction, mut color, config) in button_query.iter_mut() {
+        match interaction {
+            Interaction::Clicked => *color = config.pressed_color.into(),
+            Interaction::Hovered => *color = config.hovered_color.into(),
+            Interaction::None => *color = config.standart_color.into(),
+        }
     }
 }

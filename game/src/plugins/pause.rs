@@ -1,5 +1,7 @@
 use bevy::{app::AppExit, prelude::*};
 
+use crate::components::ui::button::ButtonBuilder;
+use crate::entity::{ComponentInjectorBuilder, EntityChildBuildDirector};
 use crate::states::GameState;
 
 const MENU_FONT: &str = "fonts/FiraMono-Medium.ttf";
@@ -9,11 +11,11 @@ const MENU_FONT: &str = "fonts/FiraMono-Medium.ttf";
 struct Pause;
 
 /// Mark for unpause button
-#[derive(Component)]
+#[derive(Component, Clone)]
 struct ContinueButton;
 
 /// Mark for exit button
-#[derive(Component)]
+#[derive(Component, Clone)]
 struct ExitButton;
 
 pub struct PausePlugin;
@@ -48,48 +50,47 @@ impl PausePlugin {
 
     fn handle_buttons() -> SystemSet {
         SystemSet::on_update(GameState::Pause)
-            .with_system(button_effects::<ContinueButton>)
-            .with_system(button_effects::<ExitButton>)
             .with_system(on_continue_pressed)
             .with_system(on_exit_pressed)
     }
 }
 
-fn standart_menu_button() -> ButtonBundle {
-    ButtonBundle {
-        style: Style {
-            size: Size::new(Val::Percent(30.0), Val::Percent(10.0)),
-            margin: UiRect {
-                left: Val::Auto,
-                right: Val::Auto,
-                bottom: Val::Px(20.0),
-                ..Default::default()
-            },
-            justify_content: JustifyContent::Center,
-            align_content: AlignContent::Center,
+fn button_style() -> Style {
+    Style {
+        size: Size::new(Val::Percent(30.0), Val::Percent(10.0)),
+        margin: UiRect {
+            left: Val::Auto,
+            right: Val::Auto,
+            bottom: Val::Px(20.0),
             ..Default::default()
         },
+        justify_content: JustifyContent::Center,
+        align_content: AlignContent::Center,
         ..Default::default()
     }
 }
 
-fn button_text_bundle(text: String, asset_server: &Res<AssetServer>) -> TextBundle {
-    TextBundle::from_section(
-        text,
-        TextStyle {
-            color: Color::WHITE,
-            font: asset_server.load(MENU_FONT),
-            font_size: 32.0,
-            ..Default::default()
-        },
-    )
-    .with_style(Style {
-        align_self: AlignSelf::Center,
-        ..Default::default()
-    })
-}
-
 fn build_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let font = asset_server.load(MENU_FONT);
+
+    // Build continue button
+    let mut continue_button_builder = ButtonBuilder::default();
+    continue_button_builder
+        .text("Continue".to_string())
+        .font(font.clone())
+        .style(button_style());
+
+    let continue_button_builder =
+        ComponentInjectorBuilder::new(continue_button_builder, ContinueButton);
+
+    let mut exit_button_builder = ButtonBuilder::default();
+    exit_button_builder
+        .text("Exit".to_string())
+        .font(font)
+        .style(button_style());
+
+    let exit_button_builder = ComponentInjectorBuilder::new(exit_button_builder, ExitButton);
+
     commands
         .spawn(Pause)
         .insert(NodeBundle {
@@ -112,20 +113,8 @@ fn build_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
             background_color: Color::rgba(0.0, 0.0, 0.0, 0.8).into(),
             ..Default::default()
         })
-        .with_children(|cs| {
-            cs.spawn(standart_menu_button())
-                .insert(ContinueButton)
-                .with_children(|cs| {
-                    cs.spawn(button_text_bundle("Continue".to_string(), &asset_server));
-                });
-        })
-        .with_children(|cs| {
-            cs.spawn(standart_menu_button())
-                .insert(ExitButton)
-                .with_children(|cs| {
-                    cs.spawn(button_text_bundle("Exit".to_string(), &asset_server));
-                });
-        });
+        .build_child_entity(&continue_button_builder)
+        .build_child_entity(&exit_button_builder);
 }
 
 fn despawn_menu(mut commands: Commands, root: Query<Entity, With<Pause>>) {
@@ -147,18 +136,6 @@ fn pop_pause_state(mut key_state: ResMut<Input<KeyCode>>, mut state: ResMut<Stat
     if key_state.just_pressed(KeyCode::Escape) {
         state.pop().ok();
         key_state.reset(KeyCode::Escape);
-    }
-}
-
-fn button_effects<T: Component>(
-    mut button_query: Query<(&Interaction, &mut BackgroundColor), (With<Button>, With<T>)>,
-) {
-    for (interaction, mut color) in button_query.iter_mut() {
-        match interaction {
-            Interaction::Clicked => *color = Color::rgb(0.7, 0.7, 0.7).into(),
-            Interaction::Hovered => *color = Color::rgb(0.5, 0.5, 0.5).into(),
-            Interaction::None => *color = Color::rgb(0.3, 0.3, 0.3).into(),
-        }
     }
 }
 
