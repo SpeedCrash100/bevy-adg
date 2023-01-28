@@ -2,4 +2,5 @@
 pub enum GameState {
     InGame,
     Pause,
+    Respawn,
 }

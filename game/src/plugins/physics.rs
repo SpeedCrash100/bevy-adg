@@ -12,14 +12,25 @@ impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1.0))
             // .add_plugin(RapierDebugRenderPlugin::default())
-            .add_startup_system(no_gravity)
-            .add_system_set(Self::update_systems())
-            .add_system_set(Self::on_pause())
-            .add_system_set(Self::on_continue());
+            .add_startup_system(no_gravity);
+
+        for system_set in Self::get_update_system_sets() {
+            app.add_system_set(system_set);
+        }
     }
 }
 
 impl PhysicsPlugin {
+    fn get_update_system_sets() -> Vec<SystemSet> {
+        vec![
+            Self::update_systems(),
+            Self::on_pause(),
+            Self::on_continue(),
+            Self::on_enter_in_game(),
+            Self::on_exit_from_game(),
+        ]
+    }
+
     fn update_systems() -> SystemSet {
         SystemSet::on_update(GameState::InGame)
             .with_system(external_force_children_sum)
@@ -32,6 +43,14 @@ impl PhysicsPlugin {
 
     fn on_continue() -> SystemSet {
         SystemSet::on_exit(GameState::Pause).with_system(unpause_physic)
+    }
+
+    fn on_enter_in_game() -> SystemSet {
+        SystemSet::on_enter(GameState::InGame).with_system(unpause_physic)
+    }
+
+    fn on_exit_from_game() -> SystemSet {
+        SystemSet::on_exit(GameState::InGame).with_system(pause_physic)
     }
 }
 

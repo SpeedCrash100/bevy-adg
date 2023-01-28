@@ -28,6 +28,7 @@ pub fn run() {
         .add_plugin(plugins::weapon::WeaponPlugin)
         .add_plugin(plugins::hud::HudPlugin)
         .add_plugin(plugins::pause::PausePlugin)
+        .add_plugin(plugins::respawn::RespawnPlugin)
         .add_startup_system(set_to_fullscreen);
 
     // Debug only components

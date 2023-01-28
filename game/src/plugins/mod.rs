@@ -14,6 +14,8 @@ pub mod pause;
 pub mod physics;
 /// Adds player ship and controls for it
 pub mod player;
+/// Adds respawn menu
+pub mod respawn;
 /// Adds ship processing system
 pub mod ship;
 /// Adds weapons processing system
