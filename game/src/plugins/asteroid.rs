@@ -8,11 +8,11 @@ use rand::Rng;
 use crate::{
     components::{
         asteroid::{Asteroid, AsteroidBuilder, AsteroidSizeLevel},
-        common::{Despawn, DespawnOn},
+        common::Despawn,
         health::Dead,
         player::Player,
     },
-    entity::{ComponentInjectorBuilder, EntityBuildDirector},
+    entity::EntityBuildDirector,
     math::Position,
     random::Deviate,
     stages::LivingStages,
@@ -40,7 +40,6 @@ impl Plugin for AsteroidsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AsteroidCount>()
             .add_system_set(Self::spawn_asteroid_systems())
-            .add_system_set(Self::despawn_asteroids_on_exit())
             .add_system_set_to_stage(LivingStages::DeadProcessing, Self::dead_handling());
     }
 }
@@ -52,10 +51,6 @@ impl AsteroidsPlugin {
 
     fn dead_handling() -> SystemSet {
         SystemSet::new().with_system(asteroid_dead)
-    }
-
-    fn despawn_asteroids_on_exit() -> SystemSet {
-        SystemSet::on_exit(GameState::InGame).with_system(destroy_asteroids)
     }
 }
 
@@ -96,9 +91,7 @@ fn asteroids_spawn_system(
                 .base_velocity(Vec2::ZERO),
         );
 
-        commands
-            .entity(created_entity)
-            .insert(DespawnOn::OutOfRange(1.5 * MAX_SPAWN_RANGE));
+        commands.entity(created_entity);
     }
 }
 
@@ -149,21 +142,10 @@ fn asteroid_dead(
                 .size_level(size_level)
                 .base_velocity(parent_velocity.linvel);
 
-            let builder = ComponentInjectorBuilder::new(
-                builder,
-                DespawnOn::OutOfRange(1.5 * MAX_SPAWN_RANGE),
-            );
-
             commands.build_entity(&builder);
 
             //
             velocity_angle += velocity_angle_step;
         }
-    }
-}
-
-fn destroy_asteroids(mut commands: Commands, q_asteroids: Query<Entity, With<Asteroid>>) {
-    for entity in q_asteroids.iter() {
-        commands.entity(entity).insert(Despawn::Normal);
     }
 }

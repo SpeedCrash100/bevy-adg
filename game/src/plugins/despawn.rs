@@ -8,6 +8,8 @@ use crate::{
     math::Position,
 };
 
+const DESPAWN_RANGE: f32 = 3000.0;
+
 pub struct DespawnPlugin;
 
 impl Plugin for DespawnPlugin {
@@ -29,12 +31,14 @@ fn despawn_on_out_of_range(
     let player_position = player_transform.position();
 
     for (transform, mark, entity) in q_entities.iter() {
-        let DespawnOn::OutOfRange(max_range) = mark;
+        if !mark.contains(DespawnOn::OUT_OF_RANGE) {
+            continue;
+        }
 
         let position = transform.position();
         let range = (position - player_position).length();
 
-        if *max_range <= range {
+        if DESPAWN_RANGE <= range {
             commands.entity(entity).insert(Despawn::Recursive);
         }
     }

@@ -11,15 +11,26 @@ pub enum Despawn {
     Recursive,
 }
 
-/// Mark entity to despawn if something happens
-#[derive(Component, Clone)]
-pub enum DespawnOn {
-    /// If an entity is at a distance greate than the specified value, then entity must despawn
-    ///
-    /// # Warning
-    /// Entities without [Transform](bevy::prelude::Component) component will be ignored
-    OutOfRange(f32),
+bitflags! {
+    #[derive(Component)]
+    pub struct DespawnOn: u8 {
+        /// Despawn when entity is way too far
+        const OUT_OF_RANGE = 0x01;
+
+        /// Despawn entity when exiting from InGame state
+        const ON_EXIT_GAME = 0x02;
+    }
 }
+
+/// Mark that entity should be resetted when game ends
+#[derive(Component)]
+pub struct Resettable;
+
+/// Entity is queued to reset
+///
+/// The system that performs reset must remove this flag when entity resetted
+#[derive(Component)]
+pub struct Reset;
 
 #[derive(Component, Clone, Copy)]
 #[repr(i32)]

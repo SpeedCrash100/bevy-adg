@@ -4,6 +4,9 @@ use physic_objects::prelude::*;
 #[macro_use]
 extern crate derive_builder;
 
+#[macro_use]
+extern crate bitflags;
+
 mod components;
 mod entity;
 mod math;
@@ -27,6 +30,7 @@ pub fn run() {
         .add_plugin(plugins::player::PlayerPlugin)
         .add_plugin(plugins::weapon::WeaponPlugin)
         .add_plugin(plugins::hud::HudPlugin)
+        .add_plugin(plugins::ingame::InGamePlugin)
         .add_plugin(plugins::pause::PausePlugin)
         .add_plugin(plugins::respawn::RespawnPlugin)
         .add_startup_system(set_to_fullscreen);

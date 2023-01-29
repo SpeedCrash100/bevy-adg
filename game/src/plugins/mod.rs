@@ -6,6 +6,8 @@ pub mod background;
 pub mod despawn;
 /// Adds hud to screen
 pub mod hud;
+/// Handles most of InGame state logic(Despawn, Reset, etc)
+pub mod ingame;
 /// Adds living(entity with [Health]) processing: adds [Dead] marks so you can process what to do when object is dead
 pub mod living;
 /// Adds pause game
