@@ -190,13 +190,26 @@ fn fire_main(
 
 fn player_dead_handler(
     mut commands: Commands,
-    mut q_ships: Query<Entity, (With<Dead>, With<Ship>, With<Player>)>,
+    q_ships: Query<(Entity, &Children), (With<Dead>, With<Ship>, With<Player>)>,
+    mut q_engines: Query<&mut Engine>,
 ) {
-    for entity in q_ships.iter_mut() {
-        commands
-            .entity(entity)
-            .insert(Regenerate::OneTimeToFull)
-            .insert(PositionBundle::new(Vec2::ZERO, Layer::Main))
-            .insert(Velocity::zero());
+    let Ok((entity, children)) = q_ships.get_single() else {return};
+
+    // Respawn player
+    commands
+        .entity(entity)
+        .insert(Regenerate::OneTimeToFull)
+        .insert(PositionBundle::new(Vec2::ZERO, Layer::Main))
+        .insert(Velocity::zero());
+
+    // Reset engines
+    let engines: Vec<_> = children
+        .iter()
+        .filter(|el| q_engines.contains(**el))
+        .collect();
+
+    for entity in engines {
+        let mut engine = q_engines.get_mut(*entity).unwrap();
+        engine.set_throttle(0.0);
     }
 }
