@@ -23,7 +23,7 @@ bitflags! {
 }
 
 /// Mark that entity should be resetted when game ends
-#[derive(Component)]
+#[derive(Component, Clone)]
 pub struct Resettable;
 
 /// Entity is queued to reset

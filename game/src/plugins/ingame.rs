@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::{
-    components::common::{Despawn, DespawnOn},
+    components::common::{Despawn, DespawnOn, Reset, Resettable},
     states::GameState,
 };
 
@@ -21,7 +21,9 @@ impl InGamePlugin {
     }
 
     fn on_exit() -> SystemSet {
-        SystemSet::on_exit(GameState::InGame).with_system(despawn_entities_on_exit)
+        SystemSet::on_exit(GameState::InGame)
+            .with_system(despawn_entities_on_exit)
+            .with_system(reset_entities_on_exit)
     }
 }
 
@@ -32,5 +34,11 @@ fn despawn_entities_on_exit(mut commands: Commands, q_entities: Query<(Entity, &
         }
 
         commands.entity(entity).insert(Despawn::Recursive);
+    }
+}
+
+fn reset_entities_on_exit(mut commands: Commands, q_entities: Query<Entity, With<Resettable>>) {
+    for entity in q_entities.iter() {
+        commands.entity(entity).insert(Reset);
     }
 }

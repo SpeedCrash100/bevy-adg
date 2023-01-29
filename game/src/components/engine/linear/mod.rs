@@ -5,7 +5,7 @@ use bevy::{
 use bevy_rapier2d::prelude::ExternalForce;
 
 use super::Engine;
-use crate::entity::EntityBuilder;
+use crate::{components::common::Resettable, entity::EntityBuilder};
 
 pub mod mainengine;
 pub use mainengine::MainEngine;
@@ -40,5 +40,6 @@ impl EntityBuilder for LinearEngineCreateInfoBuilder {
             .insert(Engine::new_linear_engine(force))
             .insert(ExternalForce::default())
             .insert(LinearEngine)
+            .insert(Resettable)
     }
 }

@@ -1,16 +1,15 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::Velocity;
 
 use crate::components::camera::MainCamera;
-use crate::components::common::{Active, Layer, PositionBundle};
+use crate::components::common::{Active, Resettable};
 use crate::components::engine::{Engine, MainEngine, SwayEngine};
-use crate::components::health::{Dead, Regenerate};
+
 use crate::components::player::{Player, PlayerDecorator};
 use crate::components::ship::control::rotation::ShipTargetViewPoint;
-use crate::components::ship::{Ship, SimpleShipBuilder};
+use crate::components::ship::SimpleShipBuilder;
 use crate::components::weapon::Weapon;
-use crate::entity::EntityBuildDirector;
-use crate::stages::LivingStages;
+use crate::entity::{ComponentInjectorBuilder, EntityBuildDirector};
+
 use crate::states::GameState;
 
 pub struct PlayerPlugin;
@@ -18,8 +17,7 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(create_player_ship)
-            .add_system_set(Self::player_controls())
-            .add_system_to_stage(LivingStages::DeadProcessing, player_dead_handler);
+            .add_system_set(Self::player_controls());
     }
 }
 
@@ -37,8 +35,10 @@ impl PlayerPlugin {
 
 fn create_player_ship(mut commands: Commands) {
     let ship_builder = SimpleShipBuilder::default();
-    let player_ship_builder = PlayerDecorator::new(ship_builder);
-    commands.build_entity(&player_ship_builder);
+    let ship_builder = PlayerDecorator::new(ship_builder);
+    let ship_builder = ComponentInjectorBuilder::new(ship_builder, Resettable);
+
+    commands.build_entity(&ship_builder);
 }
 
 fn handle_mouse_controls(
@@ -185,31 +185,5 @@ fn fire_main(
         commands.entity(weapon).insert(Active);
     } else if key_state.just_released(MouseButton::Left) {
         commands.entity(weapon).remove::<Active>();
-    }
-}
-
-fn player_dead_handler(
-    mut commands: Commands,
-    q_ships: Query<(Entity, &Children), (With<Dead>, With<Ship>, With<Player>)>,
-    mut q_engines: Query<&mut Engine>,
-) {
-    let Ok((entity, children)) = q_ships.get_single() else {return};
-
-    // Respawn player
-    commands
-        .entity(entity)
-        .insert(Regenerate::OneTimeToFull)
-        .insert(PositionBundle::new(Vec2::ZERO, Layer::Main))
-        .insert(Velocity::zero());
-
-    // Reset engines
-    let engines: Vec<_> = children
-        .iter()
-        .filter(|el| q_engines.contains(**el))
-        .collect();
-
-    for entity in engines {
-        let mut engine = q_engines.get_mut(*entity).unwrap();
-        engine.set_throttle(0.0);
     }
 }

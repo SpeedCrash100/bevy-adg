@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::components::common::Despawn;
+use crate::components::common::{Despawn, Layer, PositionBundle, Reset};
 use crate::components::engine::{Engine, RotationEngine};
-use crate::components::health::Dead;
+use crate::components::health::{Dead, Regenerate};
 use crate::components::player::Player;
 use crate::components::ship::control::rotation::{RotationControl, ShipTargetViewPoint};
 use crate::components::ship::Ship;
@@ -25,6 +25,8 @@ impl ShipPlugin {
         SystemSet::on_update(GameState::InGame)
             .with_system(ship_rotate_to_target)
             .with_system(ship_engine_process)
+            .with_system(engine_reset)
+            .with_system(ship_reset)
     }
 }
 
@@ -69,12 +71,30 @@ fn ship_engine_process(
     }
 }
 
-/// This handler nust ignore Player
+/// This handler must ignore Player
 fn ship_dead_handler(
     mut commands: Commands,
     q_ships: Query<Entity, (With<Dead>, With<Ship>, Without<Player>)>,
 ) {
     for entity in q_ships.iter() {
         commands.entity(entity).insert(Despawn::Recursive);
+    }
+}
+
+fn engine_reset(mut commands: Commands, mut q_engines: Query<(Entity, &mut Engine), With<Reset>>) {
+    for (entity, mut engine) in q_engines.iter_mut() {
+        engine.set_throttle(0.0);
+        commands.entity(entity).remove::<Reset>();
+    }
+}
+
+fn ship_reset(mut commands: Commands, q_ships: Query<Entity, (With<Ship>, With<Reset>)>) {
+    for entity in q_ships.iter() {
+        commands
+            .entity(entity)
+            .insert(Regenerate::OneTimeToFull)
+            .insert(PositionBundle::new(Vec2::ZERO, Layer::Main))
+            .insert(Velocity::zero())
+            .remove::<Reset>();
     }
 }
