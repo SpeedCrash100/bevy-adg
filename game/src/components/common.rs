@@ -11,6 +11,24 @@ pub enum Despawn {
     Recursive,
 }
 
+/// Special despawn timer used to despawn entities after specified time
+#[derive(Component, Clone, Copy)]
+pub struct TimeToLive(f32);
+
+impl TimeToLive {
+    pub fn new(time: f32) -> Self {
+        Self(time)
+    }
+
+    pub fn decrease(&mut self, time: f32) {
+        self.0 -= time;
+    }
+
+    pub fn finished(&self) -> bool {
+        self.0 < 0.0
+    }
+}
+
 bitflags! {
     #[derive(Component)]
     pub struct DespawnOn: u8 {
@@ -19,6 +37,9 @@ bitflags! {
 
         /// Despawn entity when exiting from InGame state
         const ON_EXIT_GAME = 0x02;
+
+        /// Despawn entity when time to live elapsed
+        const TIME_OF_LIVE = 0x04;
     }
 }
 
