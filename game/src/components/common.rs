@@ -16,7 +16,7 @@ pub enum Despawn {
 pub struct TimeToLive(f32);
 
 impl TimeToLive {
-    pub fn new(time: f32) -> Self {
+    fn new(time: f32) -> Self {
         Self(time)
     }
 
@@ -26,6 +26,35 @@ impl TimeToLive {
 
     pub fn finished(&self) -> bool {
         self.0 < 0.0
+    }
+}
+
+/// Max value for [TimeToLive]
+#[derive(Component, Clone, Copy)]
+pub struct MaxTimeToLive(f32);
+
+impl MaxTimeToLive {
+    fn new(time: f32) -> Self {
+        Self(time)
+    }
+
+    pub fn max(&self) -> f32 {
+        self.0
+    }
+}
+
+#[derive(Bundle)]
+pub struct TimeToLiveBundle {
+    time: TimeToLive,
+    max: MaxTimeToLive,
+}
+
+impl TimeToLiveBundle {
+    pub fn new(time: f32) -> Self {
+        Self {
+            time: TimeToLive::new(time),
+            max: MaxTimeToLive::new(time),
+        }
     }
 }
 
