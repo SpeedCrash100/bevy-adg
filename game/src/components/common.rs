@@ -20,6 +20,10 @@ impl TimeToLive {
         Self(time)
     }
 
+    pub fn value(&self) -> f32 {
+        self.0
+    }
+
     pub fn decrease(&mut self, time: f32) {
         self.0 -= time;
     }
@@ -91,6 +95,8 @@ pub enum Layer {
     BackgroundHigh,
 
     Main,
+
+    Effects,
 }
 
 impl From<Layer> for f32 {

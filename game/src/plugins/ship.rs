@@ -1,9 +1,10 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::components::common::{Despawn, Layer, PositionBundle, Reset};
+use crate::components::common::{Active, Despawn, Layer, PositionBundle, Reset};
 use crate::components::engine::{Engine, RotationEngine};
-use crate::components::health::{Dead, Regenerate};
+use crate::components::health::{Dead, Health, MaxHealth, Regenerate};
+use crate::components::particle::fire::FireGenerator;
 use crate::components::player::Player;
 use crate::components::ship::control::rotation::{RotationControl, ShipTargetViewPoint};
 use crate::components::ship::Ship;
@@ -27,6 +28,8 @@ impl ShipPlugin {
             .with_system(ship_engine_process)
             .with_system(engine_reset)
             .with_system(ship_reset)
+            .with_system(fire_effect_enable)
+            .with_system(fire_effect_disable)
     }
 }
 
@@ -96,5 +99,37 @@ fn ship_reset(mut commands: Commands, q_ships: Query<Entity, (With<Ship>, With<R
             .insert(PositionBundle::new(Vec2::ZERO, Layer::Main))
             .insert(Velocity::zero())
             .remove::<Reset>();
+    }
+}
+
+fn fire_effect_enable(
+    mut commands: Commands,
+    q_ships: Query<(&Health, &MaxHealth, &Children), (With<Ship>, Changed<Health>)>,
+    q_effects: Query<Entity, With<FireGenerator>>,
+) {
+    for (health, max_health, children) in q_ships.iter() {
+        let relative_health = health.health() / max_health.max_health();
+        if relative_health < 0.5 {
+            let fire_effects = children.iter().filter(|el| q_effects.contains(**el));
+            for e in fire_effects {
+                commands.entity(*e).insert(Active);
+            }
+        }
+    }
+}
+
+fn fire_effect_disable(
+    mut commands: Commands,
+    q_ships: Query<(&Health, &MaxHealth, &Children), (With<Ship>, Changed<Health>)>,
+    q_effects: Query<Entity, With<FireGenerator>>,
+) {
+    for (health, max_health, children) in q_ships.iter() {
+        let relative_health = health.health() / max_health.max_health();
+        if 0.5 < relative_health {
+            let fire_effects = children.iter().filter(|el| q_effects.contains(**el));
+            for e in fire_effects {
+                commands.entity(*e).remove::<Active>();
+            }
+        }
     }
 }

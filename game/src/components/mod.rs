@@ -3,6 +3,7 @@ pub mod camera;
 pub mod common;
 pub mod engine;
 pub mod health;
+pub mod particle;
 pub mod player;
 pub mod ship;
 pub mod ui;

@@ -33,6 +33,7 @@ pub fn run() {
         .add_plugin(plugins::ingame::InGamePlugin)
         .add_plugin(plugins::pause::PausePlugin)
         .add_plugin(plugins::respawn::RespawnPlugin)
+        .add_plugin(plugins::particle::ParticlePlugin)
         .add_startup_system(set_to_fullscreen);
 
     // Debug only components

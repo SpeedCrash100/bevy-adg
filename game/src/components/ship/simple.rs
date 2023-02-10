@@ -6,6 +6,7 @@ use physic_objects::prelude::*;
 use crate::components::common::{Layer, PositionBundle};
 use crate::components::engine::{MainEngineBuilder, RotationEngineBuilder, SwayEngineBuilder};
 use crate::components::health::{CollisionDamageBundle, HealthBundle};
+use crate::components::particle::fire::FireGeneratorBundle;
 use crate::components::weapon::machinegun::MachineGunBuilder;
 use crate::entity::{EntityBuildDirector, EntityBuilder};
 use crate::math::RotateAroundZ;
@@ -68,6 +69,14 @@ impl EntityBuilder for ShipCreateInfoBuilder {
                         .firerate(4.0)
                         .position(Vec2::X * 33.0),
                 );
+            })
+            .with_children(|cb| {
+                // Fire effects when damaged
+                cb.spawn(FireGeneratorBundle::new(
+                    2.5,
+                    5.0,
+                    Transform::from_translation(Vec3::ZERO),
+                ));
             });
 
         EntityBuilder::build(&RotationControlBuilder::default(), commands)

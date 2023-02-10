@@ -10,6 +10,8 @@ pub mod hud;
 pub mod ingame;
 /// Adds living(entity with [Health]) processing: adds [Dead] marks so you can process what to do when object is dead
 pub mod living;
+/// Adds particles processing
+pub mod particle;
 /// Adds pause game
 pub mod pause;
 /// Adds physic to world: no gravity enviroments and ability to sum external forces of children

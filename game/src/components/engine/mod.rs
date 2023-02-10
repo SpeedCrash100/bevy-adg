@@ -50,22 +50,6 @@ impl Engine {
         Self::new(max_force)
     }
 
-    pub fn into_oneway_mode(self) -> Self {
-        Self {
-            throttle: 0.0,
-            min_throttle: 0.0,
-            ..self
-        }
-    }
-
-    pub fn into_twoway_mode(self) -> Self {
-        Self {
-            throttle: 0.0,
-            min_throttle: -1.0,
-            ..self
-        }
-    }
-
     /// Returns force applied by engine
     pub fn force(&self) -> ExternalForce {
         ExternalForce {
