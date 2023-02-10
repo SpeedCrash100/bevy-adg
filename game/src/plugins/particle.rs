@@ -4,33 +4,62 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     components::{
-        common::{Active, DespawnOn, Layer, MaxTimeToLive, TimeToLive, TimeToLiveBundle},
-        particle::{ParticleColor, ParticleGenerator, ParticleSize, ParticleVelocity},
+        common::{Active, DespawnOn, Layer, MaxTimeToLive, Reset, TimeToLive, TimeToLiveBundle},
+        particle::{
+            ParticleColor, ParticleGenerator, ParticleGeneratorDeviation, ParticleGeneratorRate,
+            ParticleSize, ParticleVelocity,
+        },
     },
     math::{Angle, RotateAroundZ},
     random::Deviate,
+    states::GameState,
 };
 
 pub struct ParticlePlugin;
 
 impl Plugin for ParticlePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(particle_generator_hierarchical_spawn)
-            .add_system(particle_color_update)
-            .add_system(particle_size_update)
-            .add_system(particle_velocity_update);
+        app.add_system_set(Self::particle_spawn())
+            .add_system_set(Self::particle_update())
+            .add_system_set(Self::particle_reset());
+    }
+}
+
+impl ParticlePlugin {
+    fn particle_spawn() -> SystemSet {
+        SystemSet::on_update(GameState::InGame).with_system(particle_generator_hierarchical_spawn)
+    }
+
+    fn particle_update() -> SystemSet {
+        SystemSet::on_update(GameState::InGame)
+            .with_system(particle_color_update)
+            .with_system(particle_size_update)
+            .with_system(particle_velocity_update)
+    }
+
+    fn particle_reset() -> SystemSet {
+        SystemSet::new().with_system(particles_gen_reset)
     }
 }
 
 /// For particles generators in moving objects
 fn particle_generator_hierarchical_spawn(
     mut commands: Commands,
-    q_generators: Query<(&ParticleGenerator, &GlobalTransform, &Parent), With<Active>>,
+    q_generators: Query<
+        (
+            &ParticleGenerator,
+            &ParticleGeneratorRate,
+            &ParticleGeneratorDeviation,
+            &GlobalTransform,
+            &Parent,
+        ),
+        With<Active>,
+    >,
     q_velocity: Query<&Velocity>,
 ) {
     let mut rng = rand::thread_rng();
 
-    for (generator, transform, parent) in q_generators.iter() {
+    for (generator, rate, deviation, transform, parent) in q_generators.iter() {
         let mut particle_bundle = generator.particle();
 
         // Rotate velocity vectors and apply parent velocity
@@ -58,12 +87,11 @@ fn particle_generator_hierarchical_spawn(
         ));
 
         // Generate particles
-        let count = generator.particles_count(&mut rng);
+        let count = rate.particles_count(&mut rng);
 
         for _ in 0..count {
             // Deviate position
-            let current_particle_position =
-                particle_position.deviate(&mut rng, generator.deviation());
+            let current_particle_position = particle_position.deviate(&mut rng, deviation.get());
 
             let shape = GeometryBuilder::build_as(
                 &shape,
@@ -122,5 +150,14 @@ fn particle_velocity_update(
         let new_velocity = particle_velocity.lerp(factor);
 
         velocity.linvel = new_velocity;
+    }
+}
+
+fn particles_gen_reset(
+    mut commands: Commands,
+    q_generators: Query<Entity, (With<ParticleGenerator>, With<Reset>)>,
+) {
+    for entity in q_generators.iter() {
+        commands.entity(entity).remove::<Active>().remove::<Reset>();
     }
 }

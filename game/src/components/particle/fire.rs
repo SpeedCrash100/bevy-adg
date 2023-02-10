@@ -46,10 +46,10 @@ pub struct FireGeneratorBundle {
 impl FireGeneratorBundle {
     pub fn new(rate: f64, deviation: f64, transform: Transform) -> Self {
         let builder = FireParticleBuilder::new();
-        let generator = ParticleGenerator::new(builder, rate, deviation);
+        let generator = ParticleGenerator::new(builder);
 
         Self {
-            base_bundle: ParticleGeneratorBundle::new(generator, transform),
+            base_bundle: ParticleGeneratorBundle::new(generator, rate, deviation, transform),
             mark: FireGenerator,
         }
     }

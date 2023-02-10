@@ -5,6 +5,7 @@ use crate::components::common::{Active, Despawn, Layer, PositionBundle, Reset};
 use crate::components::engine::{Engine, RotationEngine};
 use crate::components::health::{Dead, Health, MaxHealth, Regenerate};
 use crate::components::particle::fire::FireGenerator;
+use crate::components::particle::{ParticleGeneratorDeviation, ParticleGeneratorRate};
 use crate::components::player::Player;
 use crate::components::ship::control::rotation::{RotationControl, ShipTargetViewPoint};
 use crate::components::ship::Ship;
@@ -29,6 +30,7 @@ impl ShipPlugin {
             .with_system(engine_reset)
             .with_system(ship_reset)
             .with_system(fire_effect_enable)
+            .with_system(fire_effect_progress)
             .with_system(fire_effect_disable)
     }
 }
@@ -113,6 +115,31 @@ fn fire_effect_enable(
             let fire_effects = children.iter().filter(|el| q_effects.contains(**el));
             for e in fire_effects {
                 commands.entity(*e).insert(Active);
+            }
+        }
+    }
+}
+
+fn fire_effect_progress(
+    q_ships: Query<(&Health, &MaxHealth, &Children), (With<Ship>, Changed<Health>)>,
+    mut q_effects: Query<
+        (&mut ParticleGeneratorRate, &mut ParticleGeneratorDeviation),
+        (With<FireGenerator>, Without<Ship>),
+    >,
+) {
+    for (health, max_health, children) in q_ships.iter() {
+        let relative_health = health.health() / max_health.max_health();
+
+        let effect_modifier = 1.0 - (relative_health / 0.5) as f64;
+
+        if relative_health < 0.5 {
+            for entity in children {
+                let Ok((mut rate, mut deviation)) = q_effects.get_mut(*entity) else {
+                    continue;
+                };
+
+                rate.set(effect_modifier * 5.0);
+                deviation.set(effect_modifier * 5.0);
             }
         }
     }

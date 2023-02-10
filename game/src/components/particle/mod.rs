@@ -6,6 +6,8 @@ use mathcolor::MathColor;
 mod generator;
 pub use generator::ParticleGenerator;
 pub use generator::ParticleGeneratorBundle;
+pub use generator::ParticleGeneratorDeviation;
+pub use generator::ParticleGeneratorRate;
 
 /// Fire particles
 pub mod fire;
