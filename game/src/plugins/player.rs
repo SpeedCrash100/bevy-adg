@@ -34,7 +34,7 @@ impl PlayerPlugin {
 }
 
 fn create_player_ship(mut commands: Commands) {
-    let ship_builder = SimpleShipBuilder::default();
+    let ship_builder = SimpleShipBuilder::new(Vec2::ZERO);
     let ship_builder = PlayerDecorator::new(ship_builder);
     let ship_builder = ComponentInjectorBuilder::new(ship_builder, Resettable);
 

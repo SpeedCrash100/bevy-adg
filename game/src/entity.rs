@@ -73,3 +73,33 @@ impl<B: EntityBuilder, I: Bundle + Clone> EntityBuilder for ComponentInjectorBui
         self.builder.build(commands).insert(self.injectee.clone())
     }
 }
+
+/// Allows to concatenate 2 builders in one
+///
+/// # Note
+/// Left builder applied before a right one
+pub struct BuilderConcatenator<BLeft: EntityBuilder, BRight: EntityBuilder> {
+    builder_left: BLeft,
+    builder_right: BRight,
+}
+
+impl<BLeft: EntityBuilder, BRight: EntityBuilder> BuilderConcatenator<BLeft, BRight> {
+    pub fn new(builder_left: BLeft, builder_right: BRight) -> Self {
+        Self {
+            builder_left,
+            builder_right,
+        }
+    }
+}
+
+impl<BLeft: EntityBuilder, BRight: EntityBuilder> EntityBuilder
+    for BuilderConcatenator<BLeft, BRight>
+{
+    fn build<'w, 's, 'a, 'c>(
+        &self,
+        commands: &'c mut EntityCommands<'w, 's, 'a>,
+    ) -> &'c mut EntityCommands<'w, 's, 'a> {
+        let commands = self.builder_left.build(commands);
+        self.builder_right.build(commands)
+    }
+}

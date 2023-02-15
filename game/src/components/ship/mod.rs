@@ -5,7 +5,7 @@ pub mod control;
 
 /// Simple triangle ship
 mod simple;
-pub use simple::ShipCreateInfoBuilder as SimpleShipBuilder;
+pub use simple::ShipBuilder as SimpleShipBuilder;
 
 /// Ship mark component
 #[derive(Component)]
