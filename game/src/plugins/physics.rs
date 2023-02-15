@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -33,7 +35,11 @@ impl PhysicsPlugin {
 
     fn update_systems() -> SystemSet {
         SystemSet::on_update(GameState::InGame)
-            .with_system(external_force_children_sum)
+            .with_system(
+                external_force_to_update
+                    .pipe(external_forces_sum)
+                    .pipe(external_forces_apply),
+            )
             .with_system(damage_collided_entities)
     }
 
@@ -58,24 +64,85 @@ fn no_gravity(mut physic_cfg: ResMut<RapierConfiguration>) {
     physic_cfg.gravity = [0.0, 0.0].into();
 }
 
-/// Sum all forces in children elements and apply result to parent
-fn external_force_children_sum(
-    mut q_parent: Query<(&mut ExternalForce, &Children), With<RigidBody>>,
-    q_childs: Query<&ExternalForce, Without<RigidBody>>,
-) {
-    for (mut parent_force, childrens) in q_parent.iter_mut() {
-        *parent_force = ExternalForce::default(); // Reset
+fn external_force_to_update(
+    q_changed_childs: Query<&Parent, Changed<ExternalForce>>,
+    q_highest: Query<(&ExternalForce, Entity), (Without<Parent>, With<Children>)>,
+    q_childs: Query<(&ExternalForce, &Parent)>,
+) -> Vec<Entity> {
+    let mut elements_to_update = Vec::new();
 
-        for child in childrens.iter() {
-            let Ok(force) = q_childs.get(*child) else {
-                continue;
+    for parent in q_changed_childs.iter() {
+        let mut highest = parent.get();
+        elements_to_update.push(highest);
+
+        while !q_highest.contains(highest) {
+            match q_childs.get(highest) {
+                Ok((_, new_parent)) => {
+                    highest = new_parent.get();
+                    elements_to_update.push(highest);
+                }
+                Err(_) => break,
             };
-
-            parent_force.force += force.force;
-            parent_force.torque += force.torque;
         }
     }
+
+    elements_to_update
 }
+
+fn external_forces_sum(
+    In(entities): In<Vec<Entity>>,
+    q_parent: Query<&Children>,
+    q_force: Query<&ExternalForce>,
+) -> HashMap<Entity, ExternalForce> {
+    let mut new_forces_map = HashMap::new();
+
+    for entity in entities {
+        let children = q_parent.get(entity).unwrap();
+        let mut new_force = ExternalForce::default();
+
+        for child in children.iter() {
+            let Ok(force) = q_force.get(*child) else {
+                            continue;
+                        };
+
+            new_force.force += force.force;
+            new_force.torque += force.torque;
+        }
+
+        new_forces_map.insert(entity, new_force);
+    }
+
+    new_forces_map
+}
+
+fn external_forces_apply(
+    In(forces_map): In<HashMap<Entity, ExternalForce>>,
+    mut q_force: Query<&mut ExternalForce>,
+) {
+    for (entity, new_force) in forces_map.iter() {
+        let mut force = q_force.get_mut(*entity).unwrap();
+        *force = *new_force;
+    }
+}
+
+// /// Sum all forces in children elements and apply result to parent
+// fn external_force_children_sum(
+//     mut q_parent: Query<(&mut ExternalForce, &Children), With<RigidBody>>,
+//     q_childs: Query<&ExternalForce, Without<RigidBody>>,
+// ) {
+//     for (mut parent_force, childrens) in q_parent.iter_mut() {
+//         *parent_force = ExternalForce::default(); // Reset
+
+//         for child in childrens.iter() {
+//             let Ok(force) = q_childs.get(*child) else {
+//                 continue;
+//             };
+
+//             parent_force.force += force.force;
+//             parent_force.torque += force.torque;
+//         }
+//     }
+// }
 
 fn damage_collided_entities(
     mut collision_events: EventReader<ContactForceEvent>,
