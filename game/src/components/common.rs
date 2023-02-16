@@ -47,7 +47,7 @@ impl MaxTimeToLive {
     }
 }
 
-#[derive(Bundle)]
+#[derive(Bundle, Clone, Copy)]
 pub struct TimeToLiveBundle {
     time: TimeToLive,
     max: MaxTimeToLive,

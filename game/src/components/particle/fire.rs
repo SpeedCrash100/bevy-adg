@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{math::RotateAroundZ, random::Deviate};
+use crate::{components::common::TimeToLiveBundle, math::RotateAroundZ, random::Deviate};
 
 use super::{
     ParticleBundle, ParticleBundleBuilder, ParticleColor, ParticleGenerator,
@@ -33,6 +33,7 @@ impl ParticleBundleBuilder for FireParticleBuilder {
             size: ParticleSize::new(1.0, 15.0),
             color: ParticleColor::new(Color::hsl(59.0, 1.0, 0.8), Color::hsl(30.0, 1.0, 0.5)),
             velocity: ParticleVelocity::new(start_velocity, end_velocity),
+            time_to_live: TimeToLiveBundle::new(1.0),
         }
     }
 }

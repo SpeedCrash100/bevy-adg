@@ -9,6 +9,8 @@ pub use generator::ParticleGeneratorBundle;
 pub use generator::ParticleGeneratorDeviation;
 pub use generator::ParticleGeneratorRate;
 
+use super::common::TimeToLiveBundle;
+
 /// Fire particles
 pub mod fire;
 
@@ -88,6 +90,7 @@ pub struct ParticleBundle {
     pub size: ParticleSize,
     pub color: ParticleColor,
     pub velocity: ParticleVelocity,
+    pub time_to_live: TimeToLiveBundle,
 }
 
 /// Used to generate new ParticleBundle to spawn in generators
