@@ -1,4 +1,6 @@
-use bevy::prelude::*;
+use std::collections::HashMap;
+
+use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
 use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::*;
 
@@ -15,11 +17,26 @@ use crate::{
     states::GameState,
 };
 
+const BATCH_SIZE: usize = 256;
+
+#[derive(Resource)]
+struct ParticleMesh(Handle<Mesh>);
+
+impl FromWorld for ParticleMesh {
+    fn from_world(world: &mut World) -> Self {
+        let mut meshes = world.get_resource_mut::<Assets<Mesh>>().unwrap();
+        let mesh_handle = meshes.add(Mesh::from(shape::Circle::new(0.5)));
+
+        Self(mesh_handle)
+    }
+}
+
 pub struct ParticlePlugin;
 
 impl Plugin for ParticlePlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(Self::particle_spawn())
+        app.init_resource::<ParticleMesh>()
+            .add_system_set(Self::particle_spawn())
             .add_system_set(Self::particle_update())
             .add_system_set(Self::particle_reset());
     }
@@ -56,6 +73,8 @@ fn particle_generator_hierarchical_spawn(
         With<Active>,
     >,
     q_velocity: Query<&Velocity>,
+    particle_mesh: Res<ParticleMesh>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let mut rng = rand::thread_rng();
 
@@ -76,15 +95,7 @@ fn particle_generator_hierarchical_spawn(
         let particle_position = transform.translation().truncate();
         let scale = Vec2::splat(particle_bundle.size.start()).extend(1.0);
 
-        // Shape of particles is circle with diameter equals 1
-        let shape = shapes::Circle {
-            center: Vec2::ZERO,
-            radius: 1.0 / 2.0,
-        };
-
-        let draw_mode = DrawMode::Fill(bevy_prototype_lyon::prelude::FillMode::color(
-            particle_bundle.color.start(),
-        ));
+        let material = materials.add(ColorMaterial::from(particle_bundle.color.start()));
 
         // Generate particles
         let count = rate.particles_count(&mut rng);
@@ -93,17 +104,18 @@ fn particle_generator_hierarchical_spawn(
             // Deviate position
             let current_particle_position = particle_position.deviate(&mut rng, deviation.get());
 
-            let shape = GeometryBuilder::build_as(
-                &shape,
-                draw_mode,
-                Transform::from_translation(
+            let mesh = MaterialMesh2dBundle {
+                mesh: particle_mesh.0.clone().into(),
+                transform: Transform::from_translation(
                     current_particle_position.extend(Layer::Effects.into()),
                 )
                 .with_scale(scale),
-            );
+                material: material.clone(),
+                ..default()
+            };
 
             commands
-                .spawn(shape)
+                .spawn(mesh)
                 .insert(RigidBody::Dynamic)
                 .insert(Velocity::linear(particle_bundle.velocity.start()))
                 .insert(particle_bundle.clone());
@@ -112,27 +124,44 @@ fn particle_generator_hierarchical_spawn(
 }
 
 fn particle_color_update(
-    mut q_particles: Query<(&ParticleColor, &TimeToLive, &MaxTimeToLive, &mut DrawMode)>,
+    q_particles: Query<(
+        &ParticleColor,
+        &TimeToLive,
+        &MaxTimeToLive,
+        &Handle<ColorMaterial>,
+    )>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    for (particle_color, tol, max_tol, mut draw_mode) in q_particles.iter_mut() {
+    let mut materials_new_color = HashMap::new();
+
+    for (particle_color, tol, max_tol, handle) in q_particles.iter() {
         let factor = 1.0 - tol.value() / max_tol.max();
         let new_color = particle_color.lerp(factor);
 
-        if let DrawMode::Fill(ref mut fill_mode) = *draw_mode {
-            fill_mode.color = new_color;
-        }
+        materials_new_color.insert(handle, new_color);
+    }
+
+    for (handle, new_color) in materials_new_color {
+        let Some(material) = materials.get_mut(handle) else {
+            continue;
+        };
+
+        material.color = new_color;
     }
 }
 
 fn particle_size_update(
     mut q_particles: Query<(&ParticleSize, &TimeToLive, &MaxTimeToLive, &mut Transform)>,
 ) {
-    for (particle_size, tol, max_tol, mut transform) in q_particles.iter_mut() {
-        let factor = 1.0 - tol.value() / max_tol.max();
-        let new_size = particle_size.lerp(factor);
+    q_particles.par_for_each_mut(
+        BATCH_SIZE,
+        |(particle_size, tol, max_tol, mut transform)| {
+            let factor = 1.0 - tol.value() / max_tol.max();
+            let new_size = particle_size.lerp(factor);
 
-        *transform = transform.with_scale(Vec2::splat(new_size).extend(1.0));
-    }
+            *transform = transform.with_scale(Vec2::splat(new_size).extend(1.0));
+        },
+    );
 }
 
 fn particle_velocity_update(
@@ -143,12 +172,15 @@ fn particle_velocity_update(
         &mut Velocity,
     )>,
 ) {
-    for (particle_velocity, tol, max_tol, mut velocity) in q_particles.iter_mut() {
-        let factor = 1.0 - tol.value() / max_tol.max();
-        let new_velocity = particle_velocity.lerp(factor);
+    q_particles.par_for_each_mut(
+        BATCH_SIZE,
+        |(particle_velocity, tol, max_tol, mut velocity)| {
+            let factor = 1.0 - tol.value() / max_tol.max();
+            let new_velocity = particle_velocity.lerp(factor);
 
-        velocity.linvel = new_velocity;
-    }
+            velocity.linvel = new_velocity;
+        },
+    );
 }
 
 fn particles_gen_reset(
