@@ -125,25 +125,6 @@ fn external_forces_apply(
     }
 }
 
-// /// Sum all forces in children elements and apply result to parent
-// fn external_force_children_sum(
-//     mut q_parent: Query<(&mut ExternalForce, &Children), With<RigidBody>>,
-//     q_childs: Query<&ExternalForce, Without<RigidBody>>,
-// ) {
-//     for (mut parent_force, childrens) in q_parent.iter_mut() {
-//         *parent_force = ExternalForce::default(); // Reset
-
-//         for child in childrens.iter() {
-//             let Ok(force) = q_childs.get(*child) else {
-//                 continue;
-//             };
-
-//             parent_force.force += force.force;
-//             parent_force.torque += force.torque;
-//         }
-//     }
-// }
-
 fn damage_collided_entities(
     mut collision_events: EventReader<ContactForceEvent>,
     mut q_entities: Query<&mut Health, With<CollisionDamage>>,

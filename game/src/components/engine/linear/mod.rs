@@ -1,23 +1,14 @@
-use bevy::{
-    ecs::system::EntityCommands,
-    prelude::{Component, Vec2},
-};
+use bevy::{ecs::system::EntityCommands, prelude::Vec2};
 use bevy_rapier2d::prelude::ExternalForce;
 
 use super::Engine;
 use crate::{components::common::Resettable, entity::EntityBuilder};
 
 pub mod mainengine;
-pub use mainengine::MainEngine;
 pub use mainengine::MainEngineBuilder;
 
 mod swayengine;
-pub use swayengine::SwayEngine;
 pub use swayengine::SwayEngineBuilder;
-
-/// Mark that engine can be used for movement
-#[derive(Component)]
-pub struct LinearEngine;
 
 #[derive(Builder)]
 pub struct LinearEngineCreateInfo {
@@ -39,7 +30,6 @@ impl EntityBuilder for LinearEngineCreateInfoBuilder {
         commands
             .insert(Engine::new_linear_engine(force))
             .insert(ExternalForce::default())
-            .insert(LinearEngine)
             .insert(Resettable)
     }
 }

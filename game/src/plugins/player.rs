@@ -2,10 +2,11 @@ use bevy::prelude::*;
 
 use crate::components::camera::MainCamera;
 use crate::components::common::{Active, Resettable};
-use crate::components::engine::{Engine, MainEngine, SwayEngine};
 
+use crate::components::movement::Axis;
 use crate::components::player::{Player, PlayerDecorator};
 use crate::components::ship::control::rotation::ShipTargetViewPoint;
+use crate::components::ship::control::ShipEngineController;
 use crate::components::ship::SimpleShipBuilder;
 use crate::components::weapon::Weapon;
 use crate::entity::{ComponentInjectorBuilder, EntityBuildDirector};
@@ -70,96 +71,95 @@ fn handle_mouse_controls(
 fn throttle_forward(
     key_state: Res<Input<KeyCode>>,
     q_player: Query<&Children, With<Player>>,
-    mut q_ship_engines: Query<&mut Engine, With<MainEngine>>,
+    mut q_controller: Query<&mut ShipEngineController>,
 ) {
     let children = q_player.single();
 
-    let engine_option = children
+    let controller_option = children
         .iter()
-        .find(|e| q_ship_engines.contains(**e))
-        .and_then(|e| Some(q_ship_engines.get_mut(*e).unwrap()));
+        .find(|e| q_controller.contains(**e))
+        .and_then(|e| Some(q_controller.get_mut(*e).unwrap()));
 
-    let Some(mut engine) = engine_option else {
-        warn!("Player doesn't have engine");
+    let Some(mut controller) = controller_option else {
+        warn!("Player doesn't have engines controller");
         return;
     };
 
     if key_state.just_pressed(KeyCode::W) || key_state.just_pressed(KeyCode::Up) {
-        engine.throttle_up(1.0);
+        controller.throttle_up(Axis::Main, 1.0);
     } else if key_state.just_released(KeyCode::W) || key_state.just_released(KeyCode::Up) {
-        engine.throttle_down(1.0);
+        controller.throttle_down(Axis::Main, 1.0);
     }
 }
 
 fn throttle_backward(
     key_state: Res<Input<KeyCode>>,
     q_player: Query<&Children, With<Player>>,
-    mut q_ship_engines: Query<&mut Engine, With<MainEngine>>,
+    mut q_controller: Query<&mut ShipEngineController>,
 ) {
     let children = q_player.single();
 
-    let engine_option = children
+    let controller_option = children
         .iter()
-        .find(|e| q_ship_engines.contains(**e))
-        .and_then(|e| Some(q_ship_engines.get_mut(*e).unwrap()));
+        .find(|e| q_controller.contains(**e))
+        .and_then(|e| Some(q_controller.get_mut(*e).unwrap()));
 
-    let Some(mut engine) = engine_option else {
-        warn!("Player doesn't have engine");
+    let Some(mut controller) = controller_option else {
+        warn!("Player doesn't have engines controller");
         return;
     };
 
     if key_state.just_pressed(KeyCode::S) || key_state.just_pressed(KeyCode::Down) {
-        engine.throttle_down(1.0);
+        controller.throttle_down(Axis::Main, 1.0);
     } else if key_state.just_released(KeyCode::S) || key_state.just_released(KeyCode::Down) {
-        engine.throttle_up(1.0);
+        controller.throttle_up(Axis::Main, 1.0);
     }
 }
 
 fn sway_right(
     key_state: Res<Input<KeyCode>>,
     q_player: Query<&Children, With<Player>>,
-    mut q_ship_engines: Query<&mut Engine, With<SwayEngine>>,
+    mut q_controller: Query<&mut ShipEngineController>,
 ) {
     let children = q_player.single();
 
-    let engine_option = children
+    let controller_option = children
         .iter()
-        .find(|e| q_ship_engines.contains(**e))
-        .and_then(|e| Some(q_ship_engines.get_mut(*e).unwrap()));
+        .find(|e| q_controller.contains(**e))
+        .and_then(|e| Some(q_controller.get_mut(*e).unwrap()));
 
-    let Some(mut engine) = engine_option else {
-        warn!("Player doesn't have engine");
+    let Some(mut controller) = controller_option else {
+        warn!("Player doesn't have engines controller");
         return;
     };
 
     if key_state.just_pressed(KeyCode::D) || key_state.just_pressed(KeyCode::Right) {
-        engine.throttle_up(1.0);
+        controller.throttle_up(Axis::Sway, 1.0);
     } else if key_state.just_released(KeyCode::D) || key_state.just_released(KeyCode::Right) {
-        engine.throttle_down(1.0);
+        controller.throttle_down(Axis::Sway, 1.0);
     }
 }
 
 fn sway_left(
     key_state: Res<Input<KeyCode>>,
     q_player: Query<&Children, With<Player>>,
-    mut q_ship_engines: Query<&mut Engine, With<SwayEngine>>,
+    mut q_controller: Query<&mut ShipEngineController>,
 ) {
     let children = q_player.single();
 
-    let engine_option = children
+    let controller_option = children
         .iter()
-        .find(|e| q_ship_engines.contains(**e))
-        .and_then(|e| Some(q_ship_engines.get_mut(*e).unwrap()));
+        .find(|e| q_controller.contains(**e))
+        .and_then(|e| Some(q_controller.get_mut(*e).unwrap()));
 
-    let Some(mut engine) = engine_option else {
-        warn!("Player doesn't have engine");
+    let Some(mut controller) = controller_option else {
+        warn!("Player doesn't have engines controller");
         return;
     };
-
     if key_state.just_pressed(KeyCode::A) || key_state.just_pressed(KeyCode::Left) {
-        engine.throttle_down(1.0);
+        controller.throttle_down(Axis::Sway, 1.0);
     } else if key_state.just_released(KeyCode::A) || key_state.just_released(KeyCode::Left) {
-        engine.throttle_up(1.0);
+        controller.throttle_up(Axis::Sway, 1.0);
     }
 }
 

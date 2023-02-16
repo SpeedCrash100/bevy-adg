@@ -3,16 +3,12 @@ use bevy_rapier2d::prelude::*;
 
 /// Rotation engine builder
 mod rotation;
-pub use rotation::RotationEngine;
 pub use rotation::RotationEngineCreateInfoBuilder as RotationEngineBuilder;
 
 /// Engines that can move forward/backwards but not rotate
 mod linear;
-pub use linear::LinearEngine;
 pub use linear::LinearEngineBuilder;
-pub use linear::MainEngine;
 pub use linear::MainEngineBuilder;
-pub use linear::SwayEngine;
 pub use linear::SwayEngineBuilder;
 
 #[derive(Component)]
@@ -61,29 +57,5 @@ impl Engine {
     /// Sets throttle
     pub fn set_throttle(&mut self, throttle: f32) {
         self.throttle = (throttle).clamp(self.min_throttle, self.max_throttle);
-    }
-
-    /// Get throttle
-    pub fn throttle(&self) -> f32 {
-        self.throttle
-    }
-
-    /// Changes throttle by delta
-    pub fn throttle_delta(&mut self, delta: f32) {
-        self.set_throttle((self.throttle() + delta).clamp(self.min_throttle, self.max_throttle));
-    }
-
-    /// Adds throttle on engine. Negative values is ignored
-    pub fn throttle_up(&mut self, value: f32) {
-        if 0.0 < value {
-            self.throttle_delta(value)
-        }
-    }
-
-    /// Decrease throttle on engine. Negative values is ignored
-    pub fn throttle_down(&mut self, value: f32) {
-        if 0.0 < value {
-            self.throttle_delta(-value)
-        }
     }
 }

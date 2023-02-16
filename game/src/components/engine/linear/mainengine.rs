@@ -1,11 +1,7 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
 
 use super::LinearEngineBuilder;
-use crate::entity::EntityBuilder;
-
-/// Mark that engine can be used for make things move forward/backward
-#[derive(Component)]
-pub struct MainEngine;
+use crate::{components::movement::MainAxis, entity::EntityBuilder};
 
 #[derive(Builder)]
 pub struct MainEngineCreateInfo {
@@ -24,6 +20,6 @@ impl EntityBuilder for MainEngineCreateInfoBuilder {
         let mut builder = LinearEngineBuilder::default();
         builder.force(info.force).direction(Vec2::X);
 
-        EntityBuilder::build(&builder, commands).insert(MainEngine)
+        EntityBuilder::build(&builder, commands).insert(MainAxis)
     }
 }

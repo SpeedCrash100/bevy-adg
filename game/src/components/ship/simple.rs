@@ -12,6 +12,7 @@ use crate::entity::{BuilderConcatenator, EntityBuildDirector, EntityBuilder};
 use crate::math::RotateAroundZ;
 
 use super::control::rotation::RotationControlBuilder;
+use super::control::ShipEngineControllerBundle;
 use super::Ship;
 
 /// Radius vector used to create points for ship
@@ -89,16 +90,18 @@ impl EntityBuilder for ShipEnginesBuilder {
         &self,
         commands: &'c mut EntityCommands<'w, 's, 'a>,
     ) -> &'c mut EntityCommands<'w, 's, 'a> {
-        let commands = commands
-            .with_children(|cb| {
-                cb.build_entity(RotationEngineBuilder::default().torque(50_000_000.0_f32));
-            })
-            .with_children(|cb| {
-                cb.build_entity(MainEngineBuilder::default().force(1_000_000.0));
-            })
-            .with_children(|cb| {
-                cb.build_entity(SwayEngineBuilder::default().force(1_000_000.0));
-            });
+        let commands = commands.with_children(|cb| {
+            cb.spawn(ShipEngineControllerBundle::new())
+                .with_children(|cb| {
+                    cb.build_entity(RotationEngineBuilder::default().torque(50_000_000.0_f32));
+                })
+                .with_children(|cb| {
+                    cb.build_entity(MainEngineBuilder::default().force(1_000_000.0));
+                })
+                .with_children(|cb| {
+                    cb.build_entity(SwayEngineBuilder::default().force(1_000_000.0));
+                });
+        });
 
         EntityBuilder::build(&RotationControlBuilder::default(), commands)
     }

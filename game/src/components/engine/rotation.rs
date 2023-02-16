@@ -1,13 +1,9 @@
-use bevy::{ecs::system::EntityCommands, prelude::Component};
+use bevy::ecs::system::EntityCommands;
 use bevy_rapier2d::prelude::ExternalForce;
 
-use crate::entity::EntityBuilder;
+use crate::{components::movement::RotationAxis, entity::EntityBuilder};
 
 use super::Engine;
-
-/// Mark that engine can be used for rotation
-#[derive(Component)]
-pub struct RotationEngine;
 
 #[derive(Builder)]
 pub struct RotationEngineCreateInfo {
@@ -24,6 +20,6 @@ impl EntityBuilder for RotationEngineCreateInfoBuilder {
         commands
             .insert(Engine::new_rotation_engine(create_info.torque))
             .insert(ExternalForce::default())
-            .insert(RotationEngine)
+            .insert(RotationAxis)
     }
 }

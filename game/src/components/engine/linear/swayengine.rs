@@ -1,11 +1,7 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
 
 use super::LinearEngineBuilder;
-use crate::entity::EntityBuilder;
-
-/// Mark that engine can be used for make things move Sway right/left
-#[derive(Component)]
-pub struct SwayEngine;
+use crate::{components::movement::SwayAxis, entity::EntityBuilder};
 
 #[derive(Builder)]
 pub struct SwayEngineCreateInfo {
@@ -24,6 +20,6 @@ impl EntityBuilder for SwayEngineCreateInfoBuilder {
         let mut builder = LinearEngineBuilder::default();
         builder.force(info.force).direction(Vec2::NEG_Y);
 
-        EntityBuilder::build(&builder, commands).insert(SwayEngine)
+        EntityBuilder::build(&builder, commands).insert(SwayAxis)
     }
 }
