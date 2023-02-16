@@ -4,9 +4,6 @@ use physic_objects::prelude::*;
 #[macro_use]
 extern crate derive_builder;
 
-#[macro_use]
-extern crate bitflags;
-
 mod components;
 mod entity;
 mod math;

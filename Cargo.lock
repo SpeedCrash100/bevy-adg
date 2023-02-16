@@ -1581,7 +1581,6 @@ dependencies = [
  "bevy-parallax",
  "bevy_prototype_lyon",
  "bevy_rapier2d",
- "bitflags",
  "derive_builder",
  "physic-objects",
  "pid",
