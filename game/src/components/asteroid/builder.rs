@@ -7,7 +7,7 @@ use physic_objects::prelude::*;
 use super::generate::generate_asteroid_vectors;
 use super::level::AsteroidSizeLevel;
 use super::Asteroid;
-use crate::components::common::{DespawnOn, Layer, PositionBundle};
+use crate::components::common::{DespawnOnExitGame, DespawnOnOutOfRange, Layer, PositionBundle};
 use crate::components::health::{CollisionDamageBundle, Health};
 use crate::entity::EntityBuilder;
 use crate::random::Deviate;
@@ -66,6 +66,7 @@ impl EntityBuilder for AsteroidCreateInfoBuilder {
             .insert(asteroid_level)
             .insert(transform)
             .insert(CollisionDamageBundle::new())
-            .insert(DespawnOn::OUT_OF_RANGE | DespawnOn::ON_EXIT_GAME)
+            .insert(DespawnOnOutOfRange)
+            .insert(DespawnOnExitGame)
     }
 }

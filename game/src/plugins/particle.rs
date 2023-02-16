@@ -4,7 +4,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::{
     components::{
-        common::{Active, DespawnOn, Layer, MaxTimeToLive, Reset, TimeToLive},
+        common::{Active, Layer, MaxTimeToLive, Reset, TimeToLive},
         particle::{
             ParticleColor, ParticleGenerator, ParticleGeneratorDeviation, ParticleGeneratorRate,
             ParticleSize, ParticleVelocity,
@@ -104,10 +104,9 @@ fn particle_generator_hierarchical_spawn(
 
             commands
                 .spawn(shape)
-                .insert(DespawnOn::TIME_OF_LIVE)
                 .insert(RigidBody::Dynamic)
                 .insert(Velocity::linear(particle_bundle.velocity.start()))
-                .insert(particle_bundle);
+                .insert(particle_bundle.clone());
         }
     }
 }

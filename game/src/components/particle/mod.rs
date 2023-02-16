@@ -85,7 +85,7 @@ impl ParticleVelocity {
 
 /// Typical Particle components
 /// Used to create particle in generators
-#[derive(Bundle, Clone, Copy)]
+#[derive(Bundle, Clone)]
 pub struct ParticleBundle {
     pub size: ParticleSize,
     pub color: ParticleColor,

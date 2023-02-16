@@ -47,10 +47,11 @@ impl MaxTimeToLive {
     }
 }
 
-#[derive(Bundle, Clone, Copy)]
+#[derive(Bundle, Clone)]
 pub struct TimeToLiveBundle {
     time: TimeToLive,
     max: MaxTimeToLive,
+    despawn_mark: DespawnOnTimeOfLive,
 }
 
 impl TimeToLiveBundle {
@@ -58,23 +59,22 @@ impl TimeToLiveBundle {
         Self {
             time: TimeToLive::new(time),
             max: MaxTimeToLive::new(time),
+            despawn_mark: DespawnOnTimeOfLive,
         }
     }
 }
 
-bitflags! {
-    #[derive(Component)]
-    pub struct DespawnOn: u8 {
-        /// Despawn when entity is way too far
-        const OUT_OF_RANGE = 0x01;
+/// Mark that entity must be despawned when out of range
+#[derive(Component, Clone)]
+pub struct DespawnOnOutOfRange;
 
-        /// Despawn entity when exiting from InGame state
-        const ON_EXIT_GAME = 0x02;
+/// Mark that entity must be despawned when exiting from InGame state
+#[derive(Component, Clone)]
+pub struct DespawnOnExitGame;
 
-        /// Despawn entity when time to live elapsed
-        const TIME_OF_LIVE = 0x04;
-    }
-}
+/// Mark that entity must be despawned when time to live elapsed
+#[derive(Component, Clone)]
+pub struct DespawnOnTimeOfLive;
 
 /// Mark that entity should be resetted when game ends
 #[derive(Component, Clone)]

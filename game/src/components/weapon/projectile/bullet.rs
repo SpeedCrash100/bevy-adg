@@ -6,7 +6,7 @@ use physic_objects::prelude::*;
 use super::{Projectile, ProjectileEntityBuilder};
 use crate::{
     components::{
-        common::{DespawnOn, TimeToLiveBundle},
+        common::{DespawnOnExitGame, DespawnOnOutOfRange, TimeToLiveBundle},
         health::{CollisionDamageBundle, Health},
     },
     entity::EntityBuilder,
@@ -42,7 +42,8 @@ impl EntityBuilder for BulletBuilder {
             .insert(Projectile)
             .insert(physic_object)
             .insert(Ccd::enabled())
-            .insert(DespawnOn::OUT_OF_RANGE | DespawnOn::ON_EXIT_GAME | DespawnOn::TIME_OF_LIVE)
+            .insert(DespawnOnOutOfRange)
+            .insert(DespawnOnExitGame)
             .insert(TimeToLiveBundle::new(60.0))
             .insert(Health::new(info.radius * info.density * 1.5))
             .insert(CollisionDamageBundle::new())

@@ -2,13 +2,14 @@ use bevy::prelude::*;
 
 use crate::{
     components::{
-        common::{Despawn, DespawnOn, TimeToLive},
+        common::{Despawn, DespawnOnOutOfRange, DespawnOnTimeOfLive, TimeToLive},
         player::Player,
     },
     math::Position,
 };
 
 const DESPAWN_RANGE: f32 = 3000.0;
+const BATCH_SIZE: usize = 256;
 
 pub struct DespawnPlugin;
 
@@ -22,7 +23,7 @@ impl Plugin for DespawnPlugin {
 
 fn despawn_on_out_of_range(
     mut commands: Commands,
-    q_entities: Query<(&Transform, &DespawnOn, Entity), Changed<Transform>>,
+    q_entities: Query<(&Transform, Entity), (Changed<Transform>, With<DespawnOnOutOfRange>)>,
     q_player: Query<&Transform, With<Player>>,
 ) {
     if q_entities.is_empty() {
@@ -32,11 +33,7 @@ fn despawn_on_out_of_range(
     let Ok(player_transform) = q_player.get_single() else { return; };
     let player_position = player_transform.position();
 
-    for (transform, mark, entity) in q_entities.iter() {
-        if !mark.contains(DespawnOn::OUT_OF_RANGE) {
-            continue;
-        }
-
+    for (transform, entity) in q_entities.iter() {
         let position = transform.position();
         let range = (position - player_position).length();
 
@@ -47,17 +44,19 @@ fn despawn_on_out_of_range(
 }
 
 fn update_time_to_live(mut q_entities: Query<&mut TimeToLive>, time: Res<Time>) {
-    for mut tol in q_entities.iter_mut() {
-        tol.decrease(time.delta_seconds())
-    }
+    let elapsed = time.delta_seconds();
+
+    q_entities.par_for_each_mut(BATCH_SIZE, |mut tol| {
+        tol.decrease(elapsed);
+    });
 }
 
 fn despawn_on_time_to_live(
     mut commands: Commands,
-    q_entities: Query<(&TimeToLive, &DespawnOn, Entity)>,
+    q_entities: Query<(&TimeToLive, Entity), With<DespawnOnTimeOfLive>>,
 ) {
-    for (tol, despawn_on, entity) in q_entities.iter() {
-        if tol.finished() && despawn_on.contains(DespawnOn::TIME_OF_LIVE) {
+    for (tol, entity) in q_entities.iter() {
+        if tol.finished() {
             commands.entity(entity).insert(Despawn::Recursive);
         }
     }
