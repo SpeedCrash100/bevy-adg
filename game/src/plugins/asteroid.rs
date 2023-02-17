@@ -138,7 +138,7 @@ fn asteroid_dead(
 
             let mut builder = AsteroidBuilder::default();
             builder
-                .position(position + velocity.normalize() * size.typical_radius())
+                .position(position + velocity.normalize() * size.typical_radius() / 1.5)
                 .size_level(size_level)
                 .base_velocity(parent_velocity.linvel);
 
