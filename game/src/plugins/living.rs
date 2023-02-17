@@ -3,7 +3,10 @@ use bevy::prelude::*;
 use crate::{
     components::{
         common::Despawn,
-        health::{Dead, Health, MaxHealth, Regenerate},
+        health::{
+            Dead, Health, Immortality, MaxHealth, Regenerate, TimedImmortality,
+            TimedImmortalityBundle,
+        },
     },
     stages::LivingStages,
 };
@@ -48,7 +51,8 @@ impl Plugin for LivingPlugin {
             SystemSet::new()
                 .label(DeadMarkInserterSystemSet)
                 .after(RegenerateSystemSet)
-                .with_system(dead_mark_inserter),
+                .with_system(dead_mark_inserter)
+                .with_system(timed_immortality_update),
         );
 
         app.add_system_to_stage(LivingStages::DespawnProcessing, despawn_entities);
@@ -84,6 +88,20 @@ fn despawn_entities(mut commands: Commands, q_entities: Query<(&Despawn, Entity)
         match mark {
             Despawn::Normal => commands.entity(entity).despawn(),
             Despawn::Recursive => commands.entity(entity).despawn_recursive(),
+        }
+    }
+}
+
+fn timed_immortality_update(
+    mut commands: Commands,
+    mut q_entities: Query<(&mut TimedImmortality, Entity), With<Immortality>>,
+    time: Res<Time>,
+) {
+    for (mut timer, entity) in q_entities.iter_mut() {
+        timer.tick(time.delta());
+
+        if timer.finished() {
+            commands.entity(entity).remove::<TimedImmortalityBundle>();
         }
     }
 }

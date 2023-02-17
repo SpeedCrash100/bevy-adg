@@ -4,9 +4,11 @@ use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use crate::{
-    components::health::{CollisionDamage, Health},
+    components::health::{CollisionDamage, Health, Immortality, TimedImmortalityBundle},
     states::GameState,
 };
+
+const IMMORTALITY_AFTER_COLLIDE_TIME: f32 = 0.5;
 
 pub struct PhysicsPlugin;
 
@@ -126,8 +128,9 @@ fn external_forces_apply(
 }
 
 fn damage_collided_entities(
+    mut commands: Commands,
     mut collision_events: EventReader<ContactForceEvent>,
-    mut q_entities: Query<&mut Health, With<CollisionDamage>>,
+    mut q_entities: Query<(&mut Health, Entity), (With<CollisionDamage>, Without<Immortality>)>,
 ) {
     for e in collision_events.iter() {
         let first = e.collider1;
@@ -139,13 +142,21 @@ fn damage_collided_entities(
 
         let mut entities = Vec::from(entities);
 
-        let mut first_hp = entities.swap_remove(0);
-        let mut second_hp = entities.swap_remove(0);
+        let (mut first_hp, first_entity) = entities.swap_remove(0);
+        let (mut second_hp, second_entity) = entities.swap_remove(0);
 
         let impulse = e.total_force_magnitude / 100_000.0;
 
         first_hp.damage(impulse);
         second_hp.damage(impulse);
+
+        commands
+            .entity(first_entity)
+            .insert(TimedImmortalityBundle::new(IMMORTALITY_AFTER_COLLIDE_TIME));
+
+        commands
+            .entity(second_entity)
+            .insert(TimedImmortalityBundle::new(IMMORTALITY_AFTER_COLLIDE_TIME));
     }
 }
 

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::{ActiveEvents, ContactForceEventThreshold};
 
@@ -88,6 +90,45 @@ impl CollisionDamageBundle {
             mark: CollisionDamage,
             events: ActiveEvents::CONTACT_FORCE_EVENTS,
             threshold: ContactForceEventThreshold(100_000.0),
+        }
+    }
+}
+
+/// Mark that entity should not take damage
+#[derive(Component, Clone)]
+pub struct Immortality;
+
+/// Mark that entity should not take damage
+#[derive(Component, Clone)]
+pub struct TimedImmortality(Timer);
+
+impl std::ops::Deref for TimedImmortality {
+    type Target = Timer;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl std::ops::DerefMut for TimedImmortality {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+#[derive(Bundle)]
+pub struct TimedImmortalityBundle {
+    mark: Immortality,
+    timer: TimedImmortality,
+}
+
+impl TimedImmortalityBundle {
+    pub fn new(time: f32) -> Self {
+        let timer = Timer::new(Duration::from_secs_f32(time), TimerMode::Once);
+
+        Self {
+            mark: Immortality,
+            timer: TimedImmortality(timer),
         }
     }
 }
