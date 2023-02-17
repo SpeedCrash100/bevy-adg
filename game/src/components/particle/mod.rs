@@ -14,6 +14,9 @@ use super::common::TimeToLiveBundle;
 /// Fire particles
 pub mod fire;
 
+/// Propulsion(Engine) particles
+pub mod propulsion;
+
 #[derive(Component, Clone, Copy)]
 pub struct ParticleSize {
     start: f32,

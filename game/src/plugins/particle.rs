@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use bevy::{prelude::*, sprite::MaterialMesh2dBundle};
-use bevy_prototype_lyon::prelude::*;
+
 use bevy_rapier2d::prelude::*;
 
 use crate::{

@@ -8,7 +8,7 @@ use crate::{
     states::GameState,
 };
 
-const IMMORTALITY_AFTER_COLLIDE_TIME: f32 = 0.5;
+const IMMORTALITY_AFTER_COLLIDE_TIME: f32 = 0.1;
 
 pub struct PhysicsPlugin;
 

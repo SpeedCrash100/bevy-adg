@@ -7,10 +7,12 @@ use crate::components::common::{Layer, PositionBundle};
 use crate::components::engine::{MainEngineBuilder, RotationEngineBuilder, SwayEngineBuilder};
 use crate::components::health::{CollisionDamageBundle, HealthBundle};
 use crate::components::particle::fire::FireGeneratorBundle;
+use crate::components::particle::propulsion::PropulsionParticleGeneratorBundle;
 use crate::components::weapon::machinegun::MachineGunBuilder;
 use crate::entity::{BuilderConcatenator, EntityBuildDirector, EntityBuilder};
 use crate::math::RotateAroundZ;
 
+use super::control::effects::*;
 use super::control::rotation::RotationControlBuilder;
 use super::control::ShipEngineControllerBundle;
 use super::Ship;
@@ -100,6 +102,81 @@ impl EntityBuilder for ShipEnginesBuilder {
                 })
                 .with_children(|cb| {
                     cb.build_entity(SwayEngineBuilder::default().force(1_000_000.0));
+                })
+                // 1 Main engine effect
+                .with_children(|cb| {
+                    cb.spawn(PropulsionParticleGeneratorBundle::new(
+                        1.0,
+                        10.0,
+                        1.0,
+                        Transform::from_translation(Vec3::NEG_X * 22.0),
+                    ))
+                    .insert(ForwardEngineEffect);
+                })
+                // 2 Backward engine effects
+                .with_children(|cb| {
+                    cb.spawn(PropulsionParticleGeneratorBundle::new(
+                        0.15,
+                        10.0,
+                        0.25,
+                        Transform::from_translation(Vec3::Y * 12.5)
+                            .with_rotation(Quat::from_rotation_z(180.0_f32.to_degrees())),
+                    ))
+                    .insert(BackwardEngineEffect);
+                })
+                .with_children(|cb| {
+                    cb.spawn(PropulsionParticleGeneratorBundle::new(
+                        0.15,
+                        10.0,
+                        0.25,
+                        Transform::from_translation(Vec3::NEG_Y * 12.5)
+                            .with_rotation(Quat::from_rotation_z(180.0_f32.to_degrees())),
+                    ))
+                    .insert(BackwardEngineEffect);
+                })
+                // Sway left
+                .with_children(|cb| {
+                    cb.spawn(PropulsionParticleGeneratorBundle::new(
+                        0.25,
+                        10.0,
+                        0.25,
+                        Transform::from_translation(Vec3::Y * 12.5)
+                            .with_rotation(Quat::from_rotation_z(90.0_f32.to_degrees())),
+                    ))
+                    .insert(SwayLeftEngineEffect);
+                })
+                // Sway right
+                .with_children(|cb| {
+                    cb.spawn(PropulsionParticleGeneratorBundle::new(
+                        0.25,
+                        10.0,
+                        0.25,
+                        Transform::from_translation(Vec3::NEG_Y * 12.5)
+                            .with_rotation(Quat::from_rotation_z(-90.0_f32.to_degrees())),
+                    ))
+                    .insert(SwayRightEngineEffect);
+                })
+                // Rotate left
+                .with_children(|cb| {
+                    cb.spawn(PropulsionParticleGeneratorBundle::new(
+                        0.05,
+                        10.0,
+                        0.25,
+                        Transform::from_translation(Vec3::X * 28.0)
+                            .with_rotation(Quat::from_rotation_z(90.0_f32.to_degrees())),
+                    ))
+                    .insert(RotateLeftEngineEffect);
+                })
+                // Rotate right
+                .with_children(|cb| {
+                    cb.spawn(PropulsionParticleGeneratorBundle::new(
+                        0.05,
+                        10.0,
+                        0.25,
+                        Transform::from_translation(Vec3::X * 28.0)
+                            .with_rotation(Quat::from_rotation_z(-90.0_f32.to_degrees())),
+                    ))
+                    .insert(RotateRightEngineEffect);
                 });
         });
 

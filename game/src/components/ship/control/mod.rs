@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::ExternalForce;
+use bevy_rapier2d::prelude::{ExternalForce, Velocity};
 
 use crate::components::{common::Resettable, movement::Axis};
 
+/// Adds effects marks for different engines
+pub mod effects;
 pub mod rotation;
 
 #[derive(Component)]
@@ -54,6 +56,7 @@ pub struct ShipEngineControllerBundle {
     transform: TransformBundle,
     force: ExternalForce,
     resettable: Resettable,
+    velocity: Velocity,
 }
 
 impl ShipEngineControllerBundle {
@@ -63,6 +66,7 @@ impl ShipEngineControllerBundle {
             transform: TransformBundle::from(Transform::default()),
             force: ExternalForce::default(),
             resettable: Resettable,
+            velocity: Velocity::default(),
         }
     }
 }

@@ -8,6 +8,7 @@ use crate::components::movement::{Axis, MainAxis, MovementAxis, RotationAxis, Sw
 use crate::components::particle::fire::FireGenerator;
 use crate::components::particle::{ParticleGeneratorDeviation, ParticleGeneratorRate};
 use crate::components::player::Player;
+use crate::components::ship::control::effects::*;
 use crate::components::ship::control::rotation::{RotationControl, ShipTargetViewPoint};
 use crate::components::ship::control::ShipEngineController;
 use crate::components::ship::Ship;
@@ -43,6 +44,13 @@ impl ShipPlugin {
             .with_system(ship_engine_controller::<SwayAxis>)
             .with_system(ship_engine_controller::<RotationAxis>)
             .with_system(ship_engine_controller_reset)
+            .with_system(ship_engine_controller_update_velocity)
+            .with_system(ship_engine_controller_effect::<ForwardEngineEffect>)
+            .with_system(ship_engine_controller_effect::<BackwardEngineEffect>)
+            .with_system(ship_engine_controller_effect::<SwayLeftEngineEffect>)
+            .with_system(ship_engine_controller_effect::<SwayRightEngineEffect>)
+            .with_system(ship_engine_controller_effect::<RotateLeftEngineEffect>)
+            .with_system(ship_engine_controller_effect::<RotateRightEngineEffect>)
     }
 }
 
@@ -190,6 +198,15 @@ fn ship_engine_controller<A: MovementAxis>(
     }
 }
 
+fn ship_engine_controller_update_velocity(
+    mut q_controllers: Query<(&Parent, &mut Velocity), With<ShipEngineController>>,
+    q_velocities: Query<&Velocity, Without<ShipEngineController>>,
+) {
+    for (parent, mut velocity) in q_controllers.iter_mut() {
+        *velocity = q_velocities.get(parent.get()).cloned().unwrap_or_default();
+    }
+}
+
 fn ship_engine_controller_reset(
     mut commands: Commands,
     mut q_controllers: Query<(Entity, &mut ShipEngineController), With<Reset>>,
@@ -198,5 +215,27 @@ fn ship_engine_controller_reset(
         controller.reset();
 
         commands.entity(entity).remove::<Reset>();
+    }
+}
+
+fn ship_engine_controller_effect<E: EffectTrigger>(
+    mut commands: Commands,
+    q_controllers: Query<(&ShipEngineController, &Children), Changed<ShipEngineController>>,
+    q_effects: Query<Entity, With<E>>,
+) {
+    for (controller, children) in q_controllers.iter() {
+        let effects = children.iter().filter(|c| q_effects.contains(**c));
+
+        let throttle = controller.throttle(E::axis());
+
+        if E::check(throttle) {
+            effects.for_each(|e| {
+                commands.entity(*e).insert(Active);
+            })
+        } else {
+            effects.for_each(|e| {
+                commands.entity(*e).remove::<Active>();
+            })
+        }
     }
 }
