@@ -120,7 +120,7 @@ impl EntityBuilder for ShipEnginesBuilder {
                         10.0,
                         0.25,
                         Transform::from_translation(Vec3::Y * 12.5)
-                            .with_rotation(Quat::from_rotation_z(180.0_f32.to_degrees())),
+                            .with_rotation(Quat::from_rotation_z(180.0_f32.to_radians())),
                     ))
                     .insert(BackwardEngineEffect);
                 })
@@ -130,7 +130,7 @@ impl EntityBuilder for ShipEnginesBuilder {
                         10.0,
                         0.25,
                         Transform::from_translation(Vec3::NEG_Y * 12.5)
-                            .with_rotation(Quat::from_rotation_z(180.0_f32.to_degrees())),
+                            .with_rotation(Quat::from_rotation_z(180.0_f32.to_radians())),
                     ))
                     .insert(BackwardEngineEffect);
                 })
