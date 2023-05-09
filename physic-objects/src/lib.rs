@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_prototype_lyon::prelude::DrawMode;
 use bevy_rapier2d::prelude::*;
 
 /// Traingle builders
@@ -81,8 +80,6 @@ pub trait PhysicObjectBuilder: Default {
 /// Created bundles should be inserted _before_ any transformation, setting physic values(velocity, force, etc) otherwise they may be overwritten
 pub trait DrawableObjectBuilder: Default {
     type OutputType: Bundle;
-
-    fn draw_mode(self, draw_mode: DrawMode) -> Self;
 
     /// Builds drawable primitive bundle only
     fn build_primitive(&self) -> Self::OutputType;

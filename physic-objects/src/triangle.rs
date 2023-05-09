@@ -7,13 +7,11 @@ use super::prelude::*;
 pub struct Builder {
     params: PhysicObjectParams,
     points: [Vec2; 3],
-    draw_mode: DrawMode,
 }
 
 impl Default for Builder {
     fn default() -> Self {
         Self {
-            draw_mode: DrawMode::Fill(bevy_prototype_lyon::prelude::FillMode::color(Color::BLACK)),
             params: Default::default(),
             points: Default::default(),
         }
@@ -57,11 +55,10 @@ impl DrawableObjectBuilder for Builder {
             closed: true,
         };
 
-        GeometryBuilder::build_as(&shape, self.draw_mode, Transform::IDENTITY)
-    }
-
-    fn draw_mode(self, draw_mode: DrawMode) -> Self {
-        Self { draw_mode, ..self }
+        ShapeBundle {
+            path: GeometryBuilder::build_as(&shape),
+            ..default()
+        }
     }
 }
 
