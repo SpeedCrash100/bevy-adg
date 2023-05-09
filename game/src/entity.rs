@@ -43,10 +43,10 @@ pub trait EntityChildBuildDirector {
 impl<'w, 's, 'a> EntityChildBuildDirector for EntityCommands<'w, 's, 'a> {
     type OutCommands = EntityCommands<'w, 's, 'a>;
 
-    fn build_child_entity<'c, B: EntityBuilder>(
-        &'c mut self,
+    fn build_child_entity<B: EntityBuilder>(
+        &mut self,
         builder: &B,
-    ) -> &'c mut Self::OutCommands {
+    ) -> &mut Self::OutCommands {
         self.with_children(|cs| {
             cs.build_entity(builder);
         })
