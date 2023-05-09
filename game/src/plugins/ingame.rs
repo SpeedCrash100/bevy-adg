@@ -11,7 +11,7 @@ impl Plugin for InGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             (despawn_entities_on_exit, reset_entities_on_exit)
-                .in_schedule(OnExit(GameState::InGame)),
+                .in_schedule(OnEnter(GameState::Respawn)),
         );
     }
 }
