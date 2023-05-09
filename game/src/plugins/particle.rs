@@ -17,8 +17,6 @@ use crate::{
     states::GameState,
 };
 
-const BATCH_SIZE: usize = 256;
-
 #[derive(Resource)]
 struct ParticleMesh(Handle<Mesh>);
 
@@ -36,26 +34,16 @@ pub struct ParticlePlugin;
 impl Plugin for ParticlePlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ParticleMesh>()
-            .add_system_set(Self::particle_spawn())
-            .add_system_set(Self::particle_update())
-            .add_system_set(Self::particle_reset());
-    }
-}
-
-impl ParticlePlugin {
-    fn particle_spawn() -> SystemSet {
-        SystemSet::on_update(GameState::InGame).with_system(particle_generator_hierarchical_spawn)
-    }
-
-    fn particle_update() -> SystemSet {
-        SystemSet::on_update(GameState::InGame)
-            .with_system(particle_color_update)
-            .with_system(particle_size_update)
-            .with_system(particle_velocity_update)
-    }
-
-    fn particle_reset() -> SystemSet {
-        SystemSet::new().with_system(particles_gen_reset)
+            .add_system(particle_generator_hierarchical_spawn.in_set(OnUpdate(GameState::InGame)))
+            .add_systems(
+                (
+                    particle_color_update,
+                    particle_size_update,
+                    particle_velocity_update,
+                )
+                    .in_set(OnUpdate(GameState::InGame)),
+            )
+            .add_system(particles_gen_reset);
     }
 }
 
@@ -153,15 +141,12 @@ fn particle_color_update(
 fn particle_size_update(
     mut q_particles: Query<(&ParticleSize, &TimeToLive, &MaxTimeToLive, &mut Transform)>,
 ) {
-    q_particles.par_for_each_mut(
-        BATCH_SIZE,
-        |(particle_size, tol, max_tol, mut transform)| {
-            let factor = 1.0 - tol.value() / max_tol.max();
-            let new_size = particle_size.lerp(factor);
+    q_particles.for_each_mut(|(particle_size, tol, max_tol, mut transform)| {
+        let factor = 1.0 - tol.value() / max_tol.max();
+        let new_size = particle_size.lerp(factor);
 
-            *transform = transform.with_scale(Vec2::splat(new_size).extend(1.0));
-        },
-    );
+        *transform = transform.with_scale(Vec2::splat(new_size).extend(1.0));
+    });
 }
 
 fn particle_velocity_update(
@@ -172,15 +157,12 @@ fn particle_velocity_update(
         &mut Velocity,
     )>,
 ) {
-    q_particles.par_for_each_mut(
-        BATCH_SIZE,
-        |(particle_velocity, tol, max_tol, mut velocity)| {
-            let factor = 1.0 - tol.value() / max_tol.max();
-            let new_velocity = particle_velocity.lerp(factor);
+    q_particles.for_each_mut(|(particle_velocity, tol, max_tol, mut velocity)| {
+        let factor = 1.0 - tol.value() / max_tol.max();
+        let new_velocity = particle_velocity.lerp(factor);
 
-            velocity.linvel = new_velocity;
-        },
-    );
+        velocity.linvel = new_velocity;
+    });
 }
 
 fn particles_gen_reset(

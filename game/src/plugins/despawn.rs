@@ -9,7 +9,6 @@ use crate::{
 };
 
 const DESPAWN_RANGE: f32 = 3000.0;
-const BATCH_SIZE: usize = 256;
 
 pub struct DespawnPlugin;
 
@@ -46,7 +45,7 @@ fn despawn_on_out_of_range(
 fn update_time_to_live(mut q_entities: Query<&mut TimeToLive>, time: Res<Time>) {
     let elapsed = time.delta_seconds();
 
-    q_entities.par_for_each_mut(BATCH_SIZE, |mut tol| {
+    q_entities.for_each_mut(|mut tol| {
         tol.decrease(elapsed);
     });
 }

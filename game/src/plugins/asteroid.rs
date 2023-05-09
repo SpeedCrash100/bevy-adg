@@ -11,6 +11,7 @@ use crate::{
         common::Despawn,
         health::Dead,
         player::Player,
+        ui::MainWindow,
     },
     entity::EntityBuildDirector,
     math::Position,
@@ -38,31 +39,22 @@ pub struct AsteroidsPlugin;
 
 impl Plugin for AsteroidsPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<AsteroidCount>()
-            .add_system_set(Self::spawn_asteroid_systems())
-            .add_system_set_to_stage(LivingStages::DeadProcessing, Self::dead_handling());
-    }
-}
-
-impl AsteroidsPlugin {
-    fn spawn_asteroid_systems() -> SystemSet {
-        SystemSet::on_update(GameState::InGame).with_system(asteroids_spawn_system)
-    }
-
-    fn dead_handling() -> SystemSet {
-        SystemSet::new().with_system(asteroid_dead)
+        app.init_resource::<AsteroidCount>().add_systems((
+            asteroids_spawn_system.in_set(OnUpdate(GameState::InGame)),
+            asteroid_dead.in_base_set(LivingStages::DeadProcessing),
+        ));
     }
 }
 
 /// Spawn asteroids
 fn asteroids_spawn_system(
     mut commands: Commands,
-    window: Res<Windows>,
+    window: Query<&Window, With<MainWindow>>,
     asteroids_count: Res<AsteroidCount>,
     asteroids: Query<(), With<Asteroid>>,
     player: Query<&Transform, With<Player>>,
 ) {
-    let window = window.get_primary().unwrap();
+    let window = window.single();
 
     let radius_w = window.width() / 2.0;
     let radius_h = window.width() / 2.0;

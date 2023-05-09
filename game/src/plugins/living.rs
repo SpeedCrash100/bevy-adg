@@ -11,51 +11,41 @@ use crate::{
     stages::LivingStages,
 };
 
-#[derive(SystemLabel)]
+#[derive(SystemSet, Debug, PartialEq, Eq, Hash, Clone)]
 pub struct DeadMarkInserterSystemSet;
 
-#[derive(SystemLabel)]
+#[derive(SystemSet, Debug, PartialEq, Eq, Hash, Clone)]
 pub struct RegenerateSystemSet;
 
 pub struct LivingPlugin;
 
 impl Plugin for LivingPlugin {
     fn build(&self, app: &mut App) {
-        app.add_stage_after(
-            CoreStage::Update,
-            LivingStages::HealthProcessing,
-            SystemStage::parallel(),
+        app.configure_sets(
+            (
+                CoreSet::Update,
+                LivingStages::HealthProcessing,
+                LivingStages::DeadProcessing,
+                LivingStages::DespawnProcessing,
+            )
+                .chain(),
         );
 
-        app.add_stage_after(
-            LivingStages::HealthProcessing,
-            LivingStages::DeadProcessing,
-            SystemStage::parallel(),
+        app.configure_sets((RegenerateSystemSet, DeadMarkInserterSystemSet).chain());
+
+        app.add_system(
+            regenerate_one_time
+                .in_base_set(LivingStages::HealthProcessing)
+                .in_set(RegenerateSystemSet),
         );
 
-        app.add_stage_after(
-            LivingStages::DeadProcessing,
-            LivingStages::DespawnProcessing,
-            SystemStage::parallel(),
+        app.add_systems(
+            (dead_mark_inserter, timed_immortality_update)
+                .in_base_set(LivingStages::HealthProcessing)
+                .in_set(DeadMarkInserterSystemSet),
         );
 
-        app.add_system_set_to_stage(
-            LivingStages::HealthProcessing,
-            SystemSet::new()
-                .label(RegenerateSystemSet)
-                .with_system(regenerate_one_time),
-        );
-
-        app.add_system_set_to_stage(
-            LivingStages::HealthProcessing,
-            SystemSet::new()
-                .label(DeadMarkInserterSystemSet)
-                .after(RegenerateSystemSet)
-                .with_system(dead_mark_inserter)
-                .with_system(timed_immortality_update),
-        );
-
-        app.add_system_to_stage(LivingStages::DespawnProcessing, despawn_entities);
+        app.add_system(despawn_entities.in_base_set(LivingStages::DespawnProcessing));
     }
 }
 

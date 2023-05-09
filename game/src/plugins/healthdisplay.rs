@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, text::TextLayoutInfo};
 
 use crate::components::health::Health;
 
@@ -37,10 +37,11 @@ fn insert_text_boxes(
                             color: Color::WHITE,
                         },
                     ),
-                    text_2d_size: bevy::text::Text2dSize {
-                        size: [80.0, 30.0].into(),
-                    },
                     transform: Transform::from_translation(Vec3::Z),
+                    ..default()
+                })
+                .insert(TextLayoutInfo {
+                    size: [80.0, 30.0].into(),
                     ..default()
                 });
             });

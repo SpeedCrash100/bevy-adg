@@ -22,36 +22,13 @@ pub struct PausePlugin;
 
 impl Plugin for PausePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state(GameState::InGame)
-            .add_system_set(Self::on_enter_pause())
-            .add_system_set(Self::on_exit_pause())
-            .add_system_set(Self::enter_pause_press())
-            .add_system_set(Self::exit_pause_press())
-            .add_system_set(Self::handle_buttons());
-    }
-}
-
-impl PausePlugin {
-    fn on_enter_pause() -> SystemSet {
-        SystemSet::on_enter(GameState::Pause).with_system(build_menu)
-    }
-
-    fn on_exit_pause() -> SystemSet {
-        SystemSet::on_exit(GameState::Pause).with_system(despawn_menu)
-    }
-
-    fn enter_pause_press() -> SystemSet {
-        SystemSet::on_update(GameState::InGame).with_system(push_pause_state)
-    }
-
-    fn exit_pause_press() -> SystemSet {
-        SystemSet::on_update(GameState::Pause).with_system(pop_pause_state)
-    }
-
-    fn handle_buttons() -> SystemSet {
-        SystemSet::on_update(GameState::Pause)
-            .with_system(on_continue_pressed)
-            .with_system(on_exit_pressed)
+        app.add_systems((
+            build_menu.in_schedule(OnEnter(GameState::Pause)),
+            despawn_menu.in_schedule(OnExit(GameState::Pause)),
+            push_pause_state.in_set(OnUpdate(GameState::InGame)),
+            pop_pause_state.in_set(OnUpdate(GameState::Pause)),
+        ))
+        .add_systems((on_continue_pressed, on_exit_pressed).in_set(OnUpdate(GameState::Pause)));
     }
 }
 
@@ -125,27 +102,33 @@ fn despawn_menu(mut commands: Commands, root: Query<Entity, With<Pause>>) {
     commands.entity(entity).despawn_recursive();
 }
 
-fn push_pause_state(mut key_state: ResMut<Input<KeyCode>>, mut state: ResMut<State<GameState>>) {
+fn push_pause_state(
+    mut key_state: ResMut<Input<KeyCode>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
     if key_state.just_pressed(KeyCode::Escape) {
-        state.push(GameState::Pause).ok();
+        next_state.set(GameState::Pause);
         key_state.reset(KeyCode::Escape);
     }
 }
 
-fn pop_pause_state(mut key_state: ResMut<Input<KeyCode>>, mut state: ResMut<State<GameState>>) {
+fn pop_pause_state(
+    mut key_state: ResMut<Input<KeyCode>>,
+    mut next_state: ResMut<NextState<GameState>>,
+) {
     if key_state.just_pressed(KeyCode::Escape) {
-        state.pop().ok();
+        next_state.set(GameState::InGame);
         key_state.reset(KeyCode::Escape);
     }
 }
 
 fn on_continue_pressed(
     button_query: Query<&Interaction, (With<Button>, With<ContinueButton>)>,
-    mut state: ResMut<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     for interaction in button_query.iter() {
         let Interaction::Clicked = *interaction else {continue;};
-        state.pop().ok();
+        next_state.set(GameState::InGame);
     }
 }
 

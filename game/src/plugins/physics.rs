@@ -18,47 +18,21 @@ impl Plugin for PhysicsPlugin {
             // .add_plugin(RapierDebugRenderPlugin::default())
             .add_startup_system(no_gravity);
 
-        for system_set in Self::get_update_system_sets() {
-            app.add_system_set(system_set);
-        }
-    }
-}
+        // Update forces
+        app.add_system(
+            external_force_to_update
+                .pipe(external_forces_sum)
+                .pipe(external_forces_apply)
+                .in_set(OnUpdate(GameState::InGame)),
+        );
+        // Damage
+        app.add_system(damage_collided_entities.in_set(OnUpdate(GameState::InGame)));
 
-impl PhysicsPlugin {
-    fn get_update_system_sets() -> Vec<SystemSet> {
-        vec![
-            Self::update_systems(),
-            Self::on_pause(),
-            Self::on_continue(),
-            Self::on_enter_in_game(),
-            Self::on_exit_from_game(),
-        ]
-    }
-
-    fn update_systems() -> SystemSet {
-        SystemSet::on_update(GameState::InGame)
-            .with_system(
-                external_force_to_update
-                    .pipe(external_forces_sum)
-                    .pipe(external_forces_apply),
-            )
-            .with_system(damage_collided_entities)
-    }
-
-    fn on_pause() -> SystemSet {
-        SystemSet::on_enter(GameState::Pause).with_system(pause_physic)
-    }
-
-    fn on_continue() -> SystemSet {
-        SystemSet::on_exit(GameState::Pause).with_system(unpause_physic)
-    }
-
-    fn on_enter_in_game() -> SystemSet {
-        SystemSet::on_enter(GameState::InGame).with_system(unpause_physic)
-    }
-
-    fn on_exit_from_game() -> SystemSet {
-        SystemSet::on_exit(GameState::InGame).with_system(pause_physic)
+        // Pausing
+        app.add_systems((
+            pause_physic.in_schedule(OnExit(GameState::InGame)),
+            unpause_physic.in_schedule(OnEnter(GameState::InGame)),
+        ));
     }
 }
 

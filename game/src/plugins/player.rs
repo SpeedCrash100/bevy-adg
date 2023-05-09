@@ -8,6 +8,7 @@ use crate::components::player::{Player, PlayerDecorator};
 use crate::components::ship::control::rotation::ShipTargetViewPoint;
 use crate::components::ship::control::ShipEngineController;
 use crate::components::ship::SimpleShipBuilder;
+use crate::components::ui::MainWindow;
 use crate::components::weapon::Weapon;
 use crate::entity::{ComponentInjectorBuilder, EntityBuildDirector};
 
@@ -17,20 +18,17 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(create_player_ship)
-            .add_system_set(Self::player_controls());
-    }
-}
-
-impl PlayerPlugin {
-    fn player_controls() -> SystemSet {
-        SystemSet::on_update(GameState::InGame)
-            .with_system(handle_mouse_controls)
-            .with_system(throttle_forward)
-            .with_system(throttle_backward)
-            .with_system(sway_left)
-            .with_system(sway_right)
-            .with_system(fire_main)
+        app.add_startup_system(create_player_ship).add_systems(
+            (
+                handle_mouse_controls,
+                throttle_forward,
+                throttle_backward,
+                sway_left,
+                sway_right,
+                fire_main,
+            )
+                .in_set(OnUpdate(GameState::InGame)),
+        );
     }
 }
 
@@ -43,14 +41,14 @@ fn create_player_ship(mut commands: Commands) {
 }
 
 fn handle_mouse_controls(
-    wnds: Res<Windows>,
+    wnds: Query<&Window, With<MainWindow>>,
     q_camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut q_player: Query<&mut ShipTargetViewPoint, With<Player>>,
 ) {
     let (camera, camera_transform) = q_camera.single();
     let mut player_target = q_player.single_mut();
 
-    let wnd = wnds.get_primary().unwrap();
+    let wnd = wnds.single();
 
     if let Some(screen_pos) = wnd.cursor_position() {
         // get the size of the window

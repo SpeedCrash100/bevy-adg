@@ -20,37 +20,35 @@ pub struct ShipPlugin;
 
 impl Plugin for ShipPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(Self::ship_update())
-            .add_system_set(Self::ship_engine_controller())
-            .add_system_to_stage(LivingStages::DeadProcessing, ship_dead_handler);
-    }
-}
-
-impl ShipPlugin {
-    fn ship_update() -> SystemSet {
-        SystemSet::on_update(GameState::InGame)
-            .with_system(ship_rotate_to_target)
-            .with_system(ship_engine_process)
-            .with_system(engine_reset)
-            .with_system(ship_reset)
-            .with_system(fire_effect_enable)
-            .with_system(fire_effect_progress)
-            .with_system(fire_effect_disable)
-    }
-
-    fn ship_engine_controller() -> SystemSet {
-        SystemSet::on_update(GameState::InGame)
-            .with_system(ship_engine_controller::<MainAxis>)
-            .with_system(ship_engine_controller::<SwayAxis>)
-            .with_system(ship_engine_controller::<RotationAxis>)
-            .with_system(ship_engine_controller_reset)
-            .with_system(ship_engine_controller_update_velocity)
-            .with_system(ship_engine_controller_effect::<ForwardEngineEffect>)
-            .with_system(ship_engine_controller_effect::<BackwardEngineEffect>)
-            .with_system(ship_engine_controller_effect::<SwayLeftEngineEffect>)
-            .with_system(ship_engine_controller_effect::<SwayRightEngineEffect>)
-            .with_system(ship_engine_controller_effect::<RotateLeftEngineEffect>)
-            .with_system(ship_engine_controller_effect::<RotateRightEngineEffect>)
+        app.add_systems(
+            (
+                ship_rotate_to_target,
+                ship_engine_process,
+                engine_reset,
+                ship_reset,
+                fire_effect_enable,
+                fire_effect_progress,
+                fire_effect_disable,
+            )
+                .in_set(OnUpdate(GameState::InGame)),
+        )
+        .add_systems(
+            (
+                ship_engine_controller::<MainAxis>,
+                ship_engine_controller::<SwayAxis>,
+                ship_engine_controller::<RotationAxis>,
+                ship_engine_controller_reset,
+                ship_engine_controller_update_velocity,
+                ship_engine_controller_effect::<ForwardEngineEffect>,
+                ship_engine_controller_effect::<BackwardEngineEffect>,
+                ship_engine_controller_effect::<SwayLeftEngineEffect>,
+                ship_engine_controller_effect::<SwayRightEngineEffect>,
+                ship_engine_controller_effect::<RotateLeftEngineEffect>,
+                ship_engine_controller_effect::<RotateRightEngineEffect>,
+            )
+                .in_set(OnUpdate(GameState::InGame)),
+        )
+        .add_system(ship_dead_handler.in_base_set(LivingStages::DeadProcessing));
     }
 }
 

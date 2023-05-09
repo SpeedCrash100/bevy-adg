@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-#[derive(StageLabel)]
+#[derive(SystemSet, Debug, PartialEq, Eq, Hash, Clone)]
+#[system_set(base)]
 pub enum LivingStages {
     /// Health processing runs after [Update] Stage
     HealthProcessing,
@@ -10,3 +11,7 @@ pub enum LivingStages {
     /// Despawn entity if it has [Despawn](crate::components::common::Despawn) mark
     DespawnProcessing,
 }
+
+#[derive(SystemSet, Debug, PartialEq, Eq, Hash, Clone)]
+#[system_set(base)]
+pub struct UiUpdate;

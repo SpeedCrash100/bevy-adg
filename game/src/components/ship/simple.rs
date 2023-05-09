@@ -70,7 +70,7 @@ impl EntityBuilder for ShipBaseBuilder {
             .insert(physic_object)
             .insert(Fill {
                 color: Color::BLUE,
-                ..default()
+                options: Default::default(),
             })
             .insert(HealthBundle::new(10000.0))
             .insert(CollisionDamageBundle::new())

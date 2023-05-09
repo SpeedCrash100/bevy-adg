@@ -7,6 +7,7 @@ use crate::{
         ui::{button::ButtonColorsConfig, progressbar::*},
     },
     entity::{ComponentInjectorBuilder, EntityBuildDirector, EntityBuilder},
+    stages::UiUpdate,
 };
 
 #[derive(Component)]
@@ -20,8 +21,9 @@ pub struct HudPlugin;
 impl Plugin for HudPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(create_root_element)
-            .add_system_to_stage(CoreStage::PostUpdate, progress_bar_update)
-            .add_system_set(Self::button_effects())
+            .configure_set(UiUpdate.after(CoreSet::PostUpdate))
+            .add_system(progress_bar_update.in_base_set(UiUpdate))
+            .add_system(button_effects.in_base_set(UiUpdate))
             .add_system(update_player_hp);
     }
 }
@@ -46,10 +48,6 @@ impl HudPlugin {
             .color_back(Color::WHITE);
 
         ComponentInjectorBuilder::new(progress_bar_builder, PlayerHP)
-    }
-
-    fn button_effects() -> SystemSet {
-        SystemSet::new().with_system(button_effects)
     }
 }
 

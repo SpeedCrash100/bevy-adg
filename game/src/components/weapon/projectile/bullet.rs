@@ -42,7 +42,7 @@ impl EntityBuilder for BulletBuilder {
             .insert(physic_object)
             .insert(Fill {
                 color: Color::GOLD,
-                ..default()
+                options: Default::default(),
             })
             .insert(Ccd::enabled())
             .insert(DespawnOnOutOfRange)

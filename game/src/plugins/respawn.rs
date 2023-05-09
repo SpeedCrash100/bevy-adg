@@ -26,35 +26,13 @@ pub struct RespawnPlugin;
 
 impl Plugin for RespawnPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_to_stage(LivingStages::DeadProcessing, check_player_death);
+        app.add_system(check_player_death.in_base_set(LivingStages::DeadProcessing));
 
-        for system_set in Self::get_update_system_sets() {
-            app.add_system_set(system_set);
-        }
-    }
-}
-
-impl RespawnPlugin {
-    fn get_update_system_sets() -> Vec<SystemSet> {
-        vec![
-            Self::on_enter_respawn(),
-            Self::on_exit_respawn(),
-            Self::handle_buttons(),
-        ]
-    }
-
-    fn on_enter_respawn() -> SystemSet {
-        SystemSet::on_enter(GameState::Respawn).with_system(build_menu)
-    }
-
-    fn on_exit_respawn() -> SystemSet {
-        SystemSet::on_exit(GameState::Respawn).with_system(despawn_menu)
-    }
-
-    fn handle_buttons() -> SystemSet {
-        SystemSet::on_update(GameState::Respawn)
-            .with_system(on_respawn_pressed)
-            .with_system(on_exit_pressed)
+        app.add_systems((
+            build_menu.in_schedule(OnEnter(GameState::Respawn)),
+            despawn_menu.in_schedule(OnExit(GameState::Respawn)),
+        ))
+        .add_systems((on_respawn_pressed, on_exit_pressed).in_set(OnUpdate(GameState::Respawn)));
     }
 }
 
@@ -130,23 +108,23 @@ fn despawn_menu(mut commands: Commands, root: Query<Entity, With<Respawn>>) {
 
 fn check_player_death(
     q_ships: Query<Entity, (With<Dead>, With<Ship>, With<Player>)>,
-    mut state: ResMut<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     let Ok(_) = q_ships.get_single() else {
         // Return if player is alive or is not exists
         return;
     };
 
-    state.set(GameState::Respawn).ok();
+    next_state.set(GameState::Respawn);
 }
 
 fn on_respawn_pressed(
     button_query: Query<&Interaction, (With<Button>, With<RespawnButton>)>,
-    mut state: ResMut<State<GameState>>,
+    mut next_state: ResMut<NextState<GameState>>,
 ) {
     for interaction in button_query.iter() {
         let Interaction::Clicked = *interaction else {continue;};
-        state.set(GameState::InGame).ok();
+        next_state.set(GameState::InGame);
     }
 }
 

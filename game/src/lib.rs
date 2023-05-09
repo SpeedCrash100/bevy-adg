@@ -1,5 +1,7 @@
-use bevy::{prelude::*, window::Windows};
+use bevy::prelude::*;
+use components::ui::MainWindow;
 use physic_objects::prelude::*;
+use states::GameState;
 
 #[macro_use]
 extern crate derive_builder;
@@ -16,7 +18,8 @@ pub fn run() {
     let mut app = App::new();
 
     // base compnents
-    app.add_plugins(DefaultPlugins)
+    app.add_state::<GameState>()
+        .add_plugins(DefaultPlugins)
         .add_plugin(PhysicObjectPlugin)
         .add_plugin(plugins::background::BackgroundPlugin)
         .add_plugin(plugins::physics::PhysicsPlugin)
@@ -31,7 +34,7 @@ pub fn run() {
         .add_plugin(plugins::pause::PausePlugin)
         .add_plugin(plugins::respawn::RespawnPlugin)
         .add_plugin(plugins::particle::ParticlePlugin)
-        .add_startup_system(set_to_fullscreen);
+        .add_startup_system(insert_marker_in_window);
 
     // Debug only components
     if cfg!(feature = "debug_hp") {
@@ -42,7 +45,7 @@ pub fn run() {
     app.run();
 }
 
-fn set_to_fullscreen(mut window: ResMut<Windows>) {
-    let primary = window.primary_mut();
-    primary.set_mode(WindowMode::Fullscreen);
+fn insert_marker_in_window(mut commands: Commands, wnds: Query<Entity, With<Window>>) {
+    let wnd = wnds.single();
+    commands.entity(wnd).insert(MainWindow);
 }

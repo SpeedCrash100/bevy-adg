@@ -59,11 +59,11 @@ impl EntityBuilder for AsteroidCreateInfoBuilder {
         commands
             .insert(Fill {
                 color: Color::ORANGE_RED,
-                ..default()
+                options: Default::default(),
             })
             .insert(Stroke {
                 color: Color::BLACK,
-                ..default()
+                options: Default::default(),
             });
 
         let transform = PositionBundle::new(create_info.position, Layer::Main);

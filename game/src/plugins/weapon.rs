@@ -21,16 +21,8 @@ pub struct WeaponPlugin;
 
 impl Plugin for WeaponPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(Self::update_weapons())
-            .add_system_to_stage(LivingStages::DeadProcessing, despawn_dead_projectiles);
-    }
-}
-
-impl WeaponPlugin {
-    fn update_weapons() -> SystemSet {
-        SystemSet::on_update(GameState::InGame)
-            .with_system(weapon_update)
-            .with_system(fire_weapon)
+        app.add_systems((weapon_update, fire_weapon).in_set(OnUpdate(GameState::InGame)))
+            .add_system(despawn_dead_projectiles.in_base_set(LivingStages::DeadProcessing));
     }
 }
 
