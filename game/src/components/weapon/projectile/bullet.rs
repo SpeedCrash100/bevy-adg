@@ -1,5 +1,5 @@
 use bevy::{ecs::system::EntityCommands, prelude::*};
-use bevy_prototype_lyon::prelude::{DrawMode, FillMode};
+use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::{Ccd, ColliderMassProperties, RigidBody};
 use physic_objects::prelude::*;
 
@@ -35,12 +35,15 @@ impl EntityBuilder for BulletBuilder {
                 body: RigidBody::Dynamic,
                 mass_properties: ColliderMassProperties::Density(info.density),
             })
-            .draw_mode(DrawMode::Fill(FillMode::color(Color::GOLD)))
             .build();
 
         commands
             .insert(Projectile)
             .insert(physic_object)
+            .insert(Fill {
+                color: Color::GOLD,
+                ..default()
+            })
             .insert(Ccd::enabled())
             .insert(DespawnOnOutOfRange)
             .insert(DespawnOnExitGame)

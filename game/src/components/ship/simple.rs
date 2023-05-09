@@ -62,13 +62,16 @@ impl EntityBuilder for ShipBaseBuilder {
                 body: RigidBody::Dynamic,
                 mass_properties: ColliderMassProperties::Density(10.0),
             })
-            .draw_mode(DrawMode::Fill(FillMode::color(Color::BLUE)))
             .points(points)
             .build();
 
         let commands = commands
             .insert(Ship)
             .insert(physic_object)
+            .insert(Fill {
+                color: Color::BLUE,
+                ..default()
+            })
             .insert(HealthBundle::new(10000.0))
             .insert(CollisionDamageBundle::new())
             .insert(PositionBundle::new(create_info.position, Layer::Main))

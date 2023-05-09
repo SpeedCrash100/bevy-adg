@@ -1,6 +1,6 @@
 use bevy::ecs::system::EntityCommands;
 use bevy::prelude::*;
-use bevy_prototype_lyon::prelude::{DrawMode, FillMode, StrokeMode};
+use bevy_prototype_lyon::prelude::*;
 use bevy_rapier2d::prelude::*;
 use physic_objects::prelude::*;
 
@@ -44,19 +44,27 @@ impl EntityBuilder for AsteroidCreateInfoBuilder {
                 body: RigidBody::Dynamic,
                 mass_properties: ColliderMassProperties::Density(20.0),
             })
-            .draw_mode(DrawMode::Outlined {
-                fill_mode: FillMode::color(Color::ORANGE_RED),
-                outline_mode: StrokeMode::new(Color::BLACK, 0.0),
-            })
             .points(asteroid_structure)
             .build();
 
+        // Physic object
         let mut rng = rand::thread_rng();
         commands.insert(physic_object).insert(Velocity {
             angvel: 0.0_f32.deviate(&mut rng, ASTEROID_ANGULAR_SPEED_DEVIATION),
             linvel: create_info.base_velocity
                 + Vec2::ZERO.deviate(&mut rng, ASTEROID_LINEAR_SPEED_DEVIATION),
         });
+
+        // Set colors and style
+        commands
+            .insert(Fill {
+                color: Color::ORANGE_RED,
+                ..default()
+            })
+            .insert(Stroke {
+                color: Color::BLACK,
+                ..default()
+            });
 
         let transform = PositionBundle::new(create_info.position, Layer::Main);
 
