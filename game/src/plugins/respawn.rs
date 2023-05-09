@@ -109,12 +109,14 @@ fn despawn_menu(mut commands: Commands, root: Query<Entity, With<Respawn>>) {
 fn check_player_death(
     q_ships: Query<Entity, (With<Dead>, With<Ship>, With<Player>)>,
     mut next_state: ResMut<NextState<GameState>>,
+    mut commands: Commands,
 ) {
-    let Ok(_) = q_ships.get_single() else {
+    let Ok(entity) = q_ships.get_single() else {
         // Return if player is alive or is not exists
         return;
     };
 
+    commands.entity(entity).remove::<Dead>();
     next_state.set(GameState::Respawn);
 }
 
