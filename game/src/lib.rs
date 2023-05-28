@@ -8,6 +8,7 @@ extern crate derive_builder;
 
 mod components;
 mod entity;
+mod goal;
 mod math;
 mod plugins;
 mod random;
@@ -34,6 +35,7 @@ pub fn run() {
         .add_plugin(plugins::pause::PausePlugin)
         .add_plugin(plugins::respawn::RespawnPlugin)
         .add_plugin(plugins::particle::ParticlePlugin)
+        .add_plugin(plugins::goal::GoalPlugin)
         .add_startup_system(insert_marker_in_window);
 
     // Debug only components

@@ -25,5 +25,8 @@ pub mod ship;
 /// Adds weapons processing system
 pub mod weapon;
 
+/// Adds goal to the game and score system
+pub mod goal;
+
 /// Adds displayable information on entities with its health
 pub mod healthdisplay;
