@@ -41,7 +41,7 @@ impl Plugin for AsteroidsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AsteroidCount>().add_systems((
             asteroids_spawn_system.in_set(OnUpdate(GameState::InGame)),
-            asteroid_dead.in_base_set(LivingStages::DeadProcessing),
+            asteroid_dead.in_set(LivingStages::DeadProcessing),
         ));
     }
 }

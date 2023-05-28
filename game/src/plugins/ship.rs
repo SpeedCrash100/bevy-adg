@@ -48,7 +48,7 @@ impl Plugin for ShipPlugin {
             )
                 .in_set(OnUpdate(GameState::InGame)),
         )
-        .add_system(ship_dead_handler.in_base_set(LivingStages::DeadProcessing));
+        .add_system(ship_dead_handler.in_set(LivingStages::DeadProcessing));
     }
 }
 

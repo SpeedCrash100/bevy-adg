@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 
 #[derive(SystemSet, Debug, PartialEq, Eq, Hash, Clone)]
-#[system_set(base)]
 pub enum LivingStages {
     /// Health processing runs after [Update] Stage
     HealthProcessing,

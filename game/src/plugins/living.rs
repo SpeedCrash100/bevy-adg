@@ -23,7 +23,6 @@ impl Plugin for LivingPlugin {
     fn build(&self, app: &mut App) {
         app.configure_sets(
             (
-                CoreSet::Update,
                 LivingStages::HealthProcessing,
                 LivingStages::DeadProcessing,
                 LivingStages::DespawnProcessing,
@@ -35,17 +34,17 @@ impl Plugin for LivingPlugin {
 
         app.add_system(
             regenerate_one_time
-                .in_base_set(LivingStages::HealthProcessing)
+                .in_set(LivingStages::HealthProcessing)
                 .in_set(RegenerateSystemSet),
         );
 
         app.add_systems(
             (dead_mark_inserter, timed_immortality_update)
-                .in_base_set(LivingStages::HealthProcessing)
+                .in_set(LivingStages::HealthProcessing)
                 .in_set(DeadMarkInserterSystemSet),
         );
 
-        app.add_system(despawn_entities.in_base_set(LivingStages::DespawnProcessing));
+        app.add_system(despawn_entities.in_set(LivingStages::DespawnProcessing));
     }
 }
 

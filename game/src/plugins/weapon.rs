@@ -22,7 +22,7 @@ pub struct WeaponPlugin;
 impl Plugin for WeaponPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems((weapon_update, fire_weapon).in_set(OnUpdate(GameState::InGame)))
-            .add_system(despawn_dead_projectiles.in_base_set(LivingStages::DeadProcessing));
+            .add_system(despawn_dead_projectiles.in_set(LivingStages::DeadProcessing));
     }
 }
 

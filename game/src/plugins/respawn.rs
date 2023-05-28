@@ -26,7 +26,7 @@ pub struct RespawnPlugin;
 
 impl Plugin for RespawnPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(check_player_death.in_base_set(LivingStages::DeadProcessing));
+        app.add_system(check_player_death.in_set(LivingStages::DeadProcessing));
 
         app.add_systems((
             build_menu.in_schedule(OnEnter(GameState::Respawn)),
