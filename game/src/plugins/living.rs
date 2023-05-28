@@ -4,7 +4,7 @@ use crate::{
     components::{
         common::Despawn,
         health::{
-            Dead, Health, Immortality, MaxHealth, Regenerate, TimedImmortality,
+            Dead, Health, Immortality, MaxHealth, RegenerateOneTimeToFull, TimedImmortality,
             TimedImmortalityBundle,
         },
     },
@@ -50,13 +50,11 @@ impl Plugin for LivingPlugin {
 
 fn regenerate_one_time(
     mut commands: Commands,
-    mut q_entity: Query<(&mut Health, &MaxHealth, &Regenerate, Entity)>,
+    mut q_entity: Query<(&mut Health, &MaxHealth, Entity), With<RegenerateOneTimeToFull>>,
 ) {
-    for (mut hp, max_hp, regen_enum, entity) in q_entity.iter_mut() {
-        let Regenerate::OneTimeToFull = regen_enum;
-
+    for (mut hp, max_hp, entity) in q_entity.iter_mut() {
         *hp = Health::new(max_hp.max_health());
-        commands.entity(entity).remove::<Regenerate>();
+        commands.entity(entity).remove::<RegenerateOneTimeToFull>();
         commands.entity(entity).remove::<Dead>();
     }
 }

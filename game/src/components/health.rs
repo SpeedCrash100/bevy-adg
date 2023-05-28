@@ -50,12 +50,9 @@ impl MaxHealth {
     }
 }
 
-/// Allow entity to regenerate health to max
+/// Tells entity with health fully regenerate on next update
 #[derive(Component)]
-pub enum Regenerate {
-    /// Regenerate to full on next tick
-    OneTimeToFull,
-}
+pub struct RegenerateOneTimeToFull;
 
 /// Adds fully healed entity with specified health
 #[derive(Bundle)]

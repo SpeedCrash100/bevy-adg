@@ -3,7 +3,7 @@ use bevy_rapier2d::prelude::*;
 
 use crate::components::common::{Active, Despawn, Layer, PositionBundle, Reset};
 use crate::components::engine::Engine;
-use crate::components::health::{Dead, Health, MaxHealth, Regenerate};
+use crate::components::health::{Dead, Health, MaxHealth, RegenerateOneTimeToFull};
 use crate::components::movement::{Axis, MainAxis, MovementAxis, RotationAxis, SwayAxis};
 use crate::components::particle::fire::FireGenerator;
 use crate::components::particle::{ParticleGeneratorDeviation, ParticleGeneratorRate};
@@ -114,7 +114,7 @@ fn ship_reset(mut commands: Commands, q_ships: Query<Entity, (With<Ship>, With<R
     for entity in q_ships.iter() {
         commands
             .entity(entity)
-            .insert(Regenerate::OneTimeToFull)
+            .insert(RegenerateOneTimeToFull)
             .insert(PositionBundle::new(Vec2::ZERO, Layer::Main))
             .insert(Velocity::zero())
             .remove::<Reset>();
