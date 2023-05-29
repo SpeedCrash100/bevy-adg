@@ -53,14 +53,18 @@ impl Default for Goal {
     }
 }
 
-pub struct GoalChangeEvent(Vec2);
+pub struct GoalChangeEvent(Goal);
 
 impl GoalChangeEvent {
-    pub fn new(pos: Vec2) -> Self {
-        Self(pos)
+    pub fn new(goal: Goal) -> Self {
+        Self(goal)
     }
 
     pub fn position(&self) -> &Vec2 {
-        &self.0
+        &self.0.position
+    }
+
+    pub fn points(&self) -> u32 {
+        self.0.points
     }
 }

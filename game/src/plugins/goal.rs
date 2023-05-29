@@ -39,7 +39,7 @@ fn goal_update_check(
 ) {
     if goal.position != prev_goal.position {
         *prev_goal = goal.clone();
-        ev_writer.send(GoalChangeEvent::new(goal.position));
+        ev_writer.send(GoalChangeEvent::new(goal.clone()));
         info!("Point count: {}", goal.points);
     }
 }

@@ -14,6 +14,7 @@ use crate::{
         ui::MainWindow,
     },
     entity::EntityBuildDirector,
+    goal::GoalChangeEvent,
     math::Position,
     random::Deviate,
     stages::LivingStages,
@@ -25,13 +26,24 @@ const MIN_SPAWN_RANGE: f32 = 200.0;
 /// Maximum range from screen border to spawn asteroid
 const MAX_SPAWN_RANGE: f32 = 1200.0;
 
+/// Starter target asteroid count
+const ASTEROID_COUNT_START: usize = 100;
+/// How fast asteroid count increasing depending on score
+const ASTEROID_COUNT_STEP: usize = 50;
+
 /// Target Asteroid count in world
 #[derive(Resource)]
 pub struct AsteroidCount(usize);
 
+impl AsteroidCount {
+    pub fn reset(&mut self) {
+        self.0 = ASTEROID_COUNT_START;
+    }
+}
+
 impl Default for AsteroidCount {
     fn default() -> Self {
-        Self(100)
+        Self(ASTEROID_COUNT_START)
     }
 }
 
@@ -42,6 +54,8 @@ impl Plugin for AsteroidsPlugin {
         app.init_resource::<AsteroidCount>().add_systems((
             asteroids_spawn_system.in_set(OnUpdate(GameState::InGame)),
             asteroid_dead.in_set(LivingStages::DeadProcessing),
+            asteroid_count_increase.in_set(OnUpdate(GameState::InGame)),
+            asteroid_count_reset.in_schedule(OnEnter(GameState::Respawn)),
         ));
     }
 }
@@ -140,4 +154,17 @@ fn asteroid_dead(
             velocity_angle += velocity_angle_step;
         }
     }
+}
+
+fn asteroid_count_increase(
+    mut ev_reader: EventReader<GoalChangeEvent>,
+    mut asteroids_count: ResMut<AsteroidCount>,
+) {
+    let Some(last_ev) = ev_reader.iter().last() else { return };
+
+    asteroids_count.0 = ASTEROID_COUNT_START + ASTEROID_COUNT_STEP * last_ev.points() as usize;
+}
+
+fn asteroid_count_reset(mut asteroids_count: ResMut<AsteroidCount>) {
+    asteroids_count.reset();
 }
