@@ -28,7 +28,7 @@ impl Plugin for GoalPlugin {
             .add_system(world_mark_update)
             .add_system(create_navigate_ui.on_startup())
             .add_system(navigate_ui_update)
-            .add_system(goal_reset_on_respawn.in_schedule(OnEnter(GameState::Respawn)));
+            .add_system(goal_reset_on_respawn.in_schedule(OnExit(GameState::Respawn)));
     }
 }
 

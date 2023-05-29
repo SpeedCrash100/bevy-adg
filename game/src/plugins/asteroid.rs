@@ -55,7 +55,7 @@ impl Plugin for AsteroidsPlugin {
             asteroids_spawn_system.in_set(OnUpdate(GameState::InGame)),
             asteroid_dead.in_set(LivingStages::DeadProcessing),
             asteroid_count_increase.in_set(OnUpdate(GameState::InGame)),
-            asteroid_count_reset.in_schedule(OnEnter(GameState::Respawn)),
+            asteroid_count_reset.in_schedule(OnExit(GameState::Respawn)),
         ));
     }
 }
